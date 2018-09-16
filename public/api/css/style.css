@@ -1,0 +1,159 @@
+html,
+body {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+@font-face {
+  font-family: 'iconfont';
+  /* project id 830198 */
+  src: url('//at.alicdn.com/t/font_830198_hob7lprob2q.eot');
+  src: url('//at.alicdn.com/t/font_830198_hob7lprob2q.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_830198_hob7lprob2q.woff') format('woff'), url('//at.alicdn.com/t/font_830198_hob7lprob2q.ttf') format('truetype'), url('//at.alicdn.com/t/font_830198_hob7lprob2q.svg#iconfont') format('svg');
+}
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke-width: 0.2px;
+  -moz-osx-font-smoothing: grayscale;
+}
+input[type="text"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: 0.5em 0.45em;
+  transition: all 0.3s;
+  border: 1px solid #ccc;
+  font-family: "Consolas";
+}
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  border-color: #FF5722;
+  box-shadow: 0 0 3px #FF5722;
+}
+input,
+button,
+textarea,
+select {
+  outline: none;
+}
+.main h1#title {
+  width: 100%;
+  text-align: center;
+}
+.main .form {
+  margin: 0 auto;
+  width: 40em;
+  position: relative;
+}
+.main .form .methods {
+  position: absolute;
+  top: 0;
+  width: 5em;
+  left: 41em;
+}
+.main .form .input {
+  height: 2em;
+  line-height: 2em;
+  margin-bottom: 0.5em;
+}
+.main .form .input:last-child {
+  margin: 0;
+}
+.main .form .input label {
+  width: 20%;
+  height: inherit;
+  display: inline-block;
+  float: left;
+}
+.main .form .input input,
+.main .form .input select {
+  width: 80%;
+  height: inherit;
+  float: left;
+  box-sizing: border-box;
+}
+.main .form .input.params1 {
+  margin-top: 2em;
+  position: relative;
+}
+.main .form .input.params1 .add {
+  position: absolute;
+  top: 0;
+  width: 6em;
+  text-align: center;
+  left: 41em;
+  display: block;
+  background-color: #FF5722;
+  color: #fff;
+  padding: 0.5em 0.6em;
+  cursor: pointer;
+  user-select: none;
+  height: 1em;
+  line-height: 1em;
+  transition: all 0.3s;
+}
+.main .form .input.params1 .add:hover {
+  background-color: #f74710;
+}
+.main .form .params.input {
+  position: relative;
+}
+.main .form .params.input .field {
+  width: 17.5%;
+  height: inherit;
+  display: inline-block;
+  float: left;
+}
+.main .form .params.input .field + span {
+  display: inline-block;
+  float: left;
+  width: 1em;
+  text-align: center;
+}
+.main .form .params.input .remove {
+  display: block;
+  width: 1em;
+  height: 1em;
+  line-height: 1em;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  left: 41em;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+.main .form .params.input .remove:hover {
+  color: #FF5722;
+}
+.main .form .submit {
+  line-height: 1em;
+  padding: 0.8em 1.3em;
+  color: #fff;
+  background-color: #01AAED;
+  border: 0;
+  cursor: pointer;
+  margin-top: 1.5em;
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50% -50%);
+}
+.main #json {
+  width: 80%;
+  height: 1000px;
+  overflow: auto;
+  border: 1px solid #ccc;
+  margin: 5em auto 0 auto;
+  font-family: "Consolas" !important;
+}
+.main #json * {
+  font-family: "Consolas" !important;
+}
+/*# sourceMappingURL=style.css.map */

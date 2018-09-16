@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>接口测试</title>
+    <script src="https://cdn.bootcss.com/jquery/1.7.2/jquery.min.js"></script>
+    <script src="api/jquery-jsonview/js/jquery.jsonview.js"></script>
+    <link rel="stylesheet" href="api/jquery-jsonview/css/jquery.jsonview.css">
+    <link rel="stylesheet" href="api/css/style.css">
+    <script src="api/js/index.js"></script>
+</head>
+<body>
+    <div class="main">
+        <h1 id="title">接口测试</h1>
+
+        <div class="form">
+
+            <!-- 请求方式 -->
+            <div class="methods">
+                <select id="methods">
+                    <option value="POST">POST</option>
+                    <option value="GET">GET</option>
+                </select>
+            </div>
+
+            <!-- 请求地址 -->
+            <div class="url input">
+                <label for="url">URL</label>
+                <input type="text" id="url">
+            </div>
+
+            <!-- 认证TOKEN -->
+            <div class="token input">
+                <label for="token">TOKEN</label>
+                <input type="text" id="token">
+            </div>
+
+            <!-- 参数开始 -->
+            <div class="params input params1">
+                <input type="text" class="field field1" value="">
+                <span>:</span>
+                <input type="text" class="value" id="value1">
+                <a class="add">
+                    + 添加参数
+                </a>
+            </div>
+
+            <button class="submit">
+                发送
+            </button>
+        </div>
+
+        <div id="json">
+
+        </div>
+    </div>
+</body>
+</html>
