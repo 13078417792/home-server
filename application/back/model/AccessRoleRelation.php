@@ -9,7 +9,9 @@
 namespace app\back\model;
 
 
-class AccessRoleRelation extends \think\Model
-{
+class AccessRoleRelation extends \think\Model{
 
+    public function access(){
+        return $this->hasOne('Access','access_id','id');
+    }
 }
