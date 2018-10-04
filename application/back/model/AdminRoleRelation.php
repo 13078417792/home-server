@@ -9,7 +9,7 @@
 namespace app\back\model;
 
 
-class AdminRole extends \think\Model
+class AdminRoleRelation extends \think\Model
 {
 
 }
