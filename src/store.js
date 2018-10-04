@@ -1,16 +1,22 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import pageTabs from './vuex/page-tabs'
+import system from './vuex/system'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  state: {
+    state: {
 
-  },
-  mutations: {
+    },
+    mutations: {
 
-  },
-  actions: {
+    },
+    actions: {
 
-  }
+    },
+    modules:{
+        pageTabs,
+        system
+    }
 })

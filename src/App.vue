@@ -1,29 +1,67 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <keep-alive v-if="layout">
+      <component :is="layout">
+        <router-view/>
+      </component>
+    </keep-alive>
+    <template v-else>
+      <router-view />
+    </template>
   </div>
 </template>
 
-<style lang="less">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
+<script>
+    import Vue from 'vue'
+    export default{
+        name:'App',
+        data(){
+            return {
+                layout:null
+            };
+        },
+        watch:{
+            '$route':function(newVal){
+                if(newVal.meta && newVal.meta.layout){
+                    this.layout = Vue.component(newVal.meta.layout,()=>import(`./layouts/${newVal.meta.layout}`)); // 异步注册组件
+                }else{
+                    this.layout = null;
+                }
+            }
+        },
+        created(){
+            // document.addEventListener('drop',function(e){
+            //     e.preventDefault()
+            // })
+            // document.addEventListener('dropend',function(e){
+            //     e.preventDefault()
+            // })
+            // document.addEventListener('dropenter',function(e){
+            //     e.preventDefault()
+            // })
+            // document.addEventListener('dropexit',function(e){
+            //     e.preventDefault()
+            // })
+            // document.addEventListener('dropleave',function(e){
+            //     e.preventDefault()
+            // })
+            // document.addEventListener('dropover',function(e){
+            //     e.preventDefault()
+            // })
+            // document.addEventListener('dropstart',function(e){
+            //     e.preventDefault()
+            // })
+
+        }
     }
+</script>
+
+<style lang="less">
+  #app {
+    width:100%;
+    height:100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #2c3e50;
   }
-}
 </style>

@@ -1,6 +1,6 @@
 {
-  "name": "service",
-  "short_name": "service",
+  "name": "home-service",
+  "short_name": "home-service",
   "icons": [
     {
       "src": "/img/icons/android-chrome-192x192.png",

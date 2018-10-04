@@ -1,5 +1,9 @@
 # service
 
+# 文件结构
+
+   src/components
+
 ## Project setup
 ```
 npm install
