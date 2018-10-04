@@ -187,7 +187,8 @@ return [
 
     'cache'                  => [
         // 驱动方式
-        'type'   => 'File',
+        //'type'   => 'File',
+        'type'   => 'memcached',
         // 缓存保存目录
         'path'   => CACHE_PATH,
         // 缓存前缀
