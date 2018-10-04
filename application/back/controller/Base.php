@@ -13,24 +13,26 @@ use \think\Cache;
 class Base extends \think\Controller{
 
     protected $mustPost = true;
+    protected $auth = '';
+    protected $dbName = '';
 
     protected function _initialize(){
-
 
         if(!config('app_debug') && $this->mustPost && !request()->isPost()){
             self::printJson(false,'请求类型错误',['mustPost'=>$this->mustPost]);
         }
-        $auth = config('app_debug')?request()->param('auth_token/s',null,'strval'):request()->post('auth_token/s',null,'strval');
+
+
+        $auth = request()->header('authorization');
+        $this->auth = $auth?:'';
         $auth_detail = $auth?Cache::tag('auth')->get($auth):[];
         $path = '/'.strtolower(request()->module()).'/'.strtolower(request()->controller()).'/'.strtolower(request()->action());
 
-        //self::printJson(false,'没有权限',['detail'=>$auth_detail,'auth'=>$auth,'params'=>$params]);
-        if(!Rbac::validateAccess(empty($auth_detail)?0:$auth_detail['id'],$path)){
+        if(config('rbac.isValidate') && !Rbac::validateAccess(empty($auth_detail)?0:$auth_detail['id'],$path)){
             self::printJson(false,'没有权限');
         }
 
-//        $this->post_data = request()->post();
-//        $this->get_data = request()->get();
+        $this->user_auth_info = $auth_detail;
 
     }
 
@@ -74,6 +76,9 @@ class Base extends \think\Controller{
         if(empty($cache)){
             return [];
         }
+
+//        dd(Cache::tag('video')->get('auth'));
+//        dd(Cache::tag('auth')->get('auth'));
         $keys = ['id','username','nickname'];
         foreach($keys as $k => $v){
             if(!array_key_exists($v,$cache)){
@@ -88,5 +93,39 @@ class Base extends \think\Controller{
         }
     }
 
+    protected function status($id,$status){
+        if(!$this->dbName){
+            return json2(false,'操作失败');
+        }
+        $db = $this->dbName;
+        $model = model($db);
+        $result = toArray($model->where(['id'=>$id])->field('pwd,add_time,update_time',true)->find());
+        if(empty($result)){
+            return json2(false,'操作失败',['error'=>'数据不存在']);
+        }
+        if(!array_key_exists('status',$result)){
+            return json2(false,'操作失败',['error'=>'该数据不可更新状态']);
+        }
+        if($status!=$result['status']){
+            $result = $model->save(['status'=>$status],['id'=>$id]);
+            return $result>0?json2(true,'更新状态成功',['status'=>$status]):json2(false,'操作失败',['error'=>'操作失败']);
+        }else{
+            return json2(true,'更新状态成功',['status'=>$status]);
+        }
+    }
+
+    protected function del($id,$key='id'){
+        if(!$this->dbName){
+            return json2(false,'操作失败');
+        }
+        $db = $this->dbName;
+        $model = ('\app\back\model\\'.ucfirst($db))::get([$key=>$id]);
+        if(empty($model)){
+            return json2(false,'删除失败',['error'=>'数据不存在']);
+        }else{
+            $model->delete();
+            return json2(true,'删除成功');
+        }
+    }
 
 }
