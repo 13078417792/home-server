@@ -11,7 +11,7 @@ $WHITELIST_PATH = [
         'Auth'=>[
             'checkAuth',
             'getAuthUserInfo',
-            'getUserList',
+            'getAccessList',
         ]
     ],
 ];
@@ -30,7 +30,11 @@ function lower_path($path){
 }
 $WHITELIST_PATH = lower_path($WHITELIST_PATH);
 return [
+    'isValidate'=>false,
     'SUPER_USERNAME'=>'admin',
+    'SUPER_UID'=>1,
+    'SUPER_ROLE_ID'=>1, // 超管角色ID
+    'MANAGER_ROLE_ID'=>2, // 普通管理员角色ID
     'SUPER_ROLE'=>'超级管理员',
 
     // 白名单，不检查权限的路由
