@@ -48,11 +48,11 @@ let routes = [{
     }, {
         path: '/video',
         name: 'video',
-        component: () => import('./views/Video')
+        component: () => import('./views/Video/Video')
     }, {
         path:'/video/upload',
         name:'video-upload',
-        component: () => import('./views/VideoUpload2'),
+        component: () => import('./views/Video/VideoUpload2'),
     }, {
         path:'/404',
         name:'not-found',
