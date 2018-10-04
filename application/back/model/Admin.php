@@ -9,9 +9,11 @@
 namespace app\back\model;
 
 use \think\Cache;
+use \app\back\validate\Admin as AdminValidate;
 class Admin extends \think\Model
 {
     static public $auth_expires = 3600*24*3;
+    static public $INIT_PASSWORD = '123456'; // 初始密码
 
 //    protected function initialize(){
 //        $this->updateTime = 'update';
@@ -19,7 +21,19 @@ class Admin extends \think\Model
 //    }
 
     public function role(){
-        $this->hasMany('AdminRoleRelation','admin_id');
+        return $this->hasMany('AdminRoleRelation','admin_id');
+    }
+
+    public function deleteUser($id){
+        if(!$id){
+            return '用户不存在';
+        }
+        $model = self::get($id);
+        if(empty($model) || !$model->delete()){
+            return '用户不存在';
+        }
+        $model->role()->delete();
+        return true;
     }
 
     public function login(array $data){
@@ -91,5 +105,62 @@ class Admin extends \think\Model
 //            ->paginate(10);
         $list = page2Array($list,false);
         return $list;
+    }
+
+    public function addAdmin(array $data){
+        $validate = validate('Admin');
+        $valid = $validate->scene('add')->check($data);
+        if($valid){
+            if(empty($data['pwd'])){
+                $data['pwd'] = password_hash(self::$INIT_PASSWORD,PASSWORD_DEFAULT);
+            }else{
+                $data['pwd'] = password_hash($data['pwd'],PASSWORD_DEFAULT);
+            }
+            $data['status'] = 1;
+            $data['add_time'] = $_SERVER['REQUEST_TIME'];
+            $data['update_time'] = $_SERVER['REQUEST_TIME'];
+            $data['nickname'] = 'User_'.substr(md5($data['username'].'_'.$_SERVER['REQUEST_TIME']),8,16);
+            $this->data($data)->allowField(true)->save();
+            $role_relation_data = [];
+            foreach($data['role'] as $value){
+                $role_relation_data[] = [
+                    'role_id'=>$value,
+                    'admin_id'=>$this->id
+                ];
+            }
+            model('AdminRoleRelation')->saveAll($role_relation_data);
+            return true;
+        }else{
+            return $validate->getError();
+        }
+    }
+
+    public function updateUser(array $data){
+        $validate = validate('Admin');
+        if(empty($data['pwd'])){
+            unset($data['pwd']);
+        }
+        if($validate->scene('update')->check($data)){
+            if(!empty($data['pwd'])){
+                $data['pwd'] = password_hash($data['pwd'],PASSWORD_DEFAULT);
+            }
+            $role_arr = $data['role'];
+            unset($data['role']);
+            $model = self::get($data['id']);
+            $relation = $model->update($data)->role();
+            $relation->delete();
+            $relation_data = [];
+            foreach($role_arr as $role){
+                $relation_data[] = [
+                  'admin_id'=>$data['id'],
+                  'role_id'=>$role
+                ];
+            }
+            $relation->saveAll($relation_data);
+//            $model->role()->delete();
+            return true;
+        }else{
+            return $validate->getError();
+        }
     }
 }
