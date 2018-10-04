@@ -13,7 +13,7 @@
 
 // 定义应用目录
 header('Access-Control-Allow-Origin:*');
-header('Access-Control-Allow-Headers:content-type,x-requested-with');
+header('Access-Control-Allow-Headers:content-type,Authorization');
 if(strtolower($_SERVER['REQUEST_METHOD'])==='options'){
     http_response_code(200);
     exit;
