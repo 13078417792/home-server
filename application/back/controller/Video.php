@@ -124,17 +124,45 @@ class Video extends Base{
     }
 
     // 获取视频列表
-    public function video_list(){
-        $data = [];
-        $user = $this->user_auth_info;
-        $super = Rbac::isSuper($user['id']);
-        $manager = Rbac::isManager($user['id']);
+    public function list(){
+        $user_info = $this->user_auth_info;
+        $super = Rbac::isSuper($user_info['id']);
+        $manager = Rbac::isManager($user_info['id']);
+
+        $condition = [
+            'is_private'=>0 // 禁止查看私密库视频
+        ];
 
         // 超管或普通管理员可以接受[仅查看自己上传的视频(myself)]参数
         if($super || $manager){
-            $data['myself'] = request('myself/d',0,'intval')?true:false;
+            request()->post('myself/d',0,'intval') && $condition['uid'] = $user_info['id'];
+            $private = !array_key_exists('private',$_POST)?true:(bool)$_POST['private'];
+            if($super && !$manager && !$private){
+                unset($condition['is_private']); // 超管可以查看任何用户的私密库视频（嘿嘿嘿）
+            }
+        }else{
+            $condition['uid'] = $user_info['id'];
         }
 
+        $result = model('UserVideo')->video_list($condition,$user_info);
+        return json2(true,'',['result'=>$result]);
+    }
+
+    // 获取单个视频信息
+    public function info(){
+        $id = request()->post('id/d',null,'intval');
+        $data = [
+            'uid'=>$this->uid,
+            'id'=>$id
+        ];
+        if($this->isSuper){
+            unset($data['uid']);
+        }
+        // $result = model('UserVideo')->info($data);
+        $result = UserVideoModel::get($data);
+        return empty($result)?json2(false,'数据不存在',['error'=>'视频已被删除']):json2(true,'',['info'=>toArray($result)]);
+
+        return $result===false?json2(false,'数据不存在',['error'=>'视频已被删除']):json2(true,'',['info'=>$result]);
     }
 
 }
