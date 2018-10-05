@@ -16,6 +16,10 @@ class Base extends \think\Controller{
     protected $auth = '';
     protected $dbName = '';
 
+    protected $uid = null;
+    protected $isSuper = false;
+    protected $isManager = false;
+
     protected function _initialize(){
 
         if(!config('app_debug') && $this->mustPost && !request()->isPost()){
@@ -33,6 +37,13 @@ class Base extends \think\Controller{
         }
         // empty($auth_detail) && self::printJson(false,'用户认证失败');
         $this->user_auth_info = $auth_detail;
+
+        if(!empty($auth_detail)){
+            $this->uid = $auth_detail['id'];
+            $this->isSuper = Rbac::isSuper($auth_detail['id']);
+            $this->isManager = Rbac::isManager($auth_detail['id']);
+        }
+
 
     }
 
