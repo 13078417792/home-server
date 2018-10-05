@@ -54,6 +54,10 @@ let routes = [{
         name:'video-upload',
         component: () => import('./views/Video/VideoUpload2'),
     }, {
+        path:'/video/update',
+        name:'video-update',
+        component: () => import('./views/Video/VideoUpdate'),
+    }, {
         path:'/404',
         name:'not-found',
         component: () => import('./views/not-found')
