@@ -31,7 +31,7 @@ class Base extends \think\Controller{
         if(config('rbac.isValidate') && !Rbac::validateAccess(empty($auth_detail)?0:$auth_detail['id'],$path)){
             self::printJson(false,'没有权限');
         }
-        empty($auth_detail) && self::printJson(false,'用户认证失败');
+        // empty($auth_detail) && self::printJson(false,'用户认证失败');
         $this->user_auth_info = $auth_detail;
 
     }
