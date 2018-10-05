@@ -27,6 +27,9 @@ function submit(){
         url:url,
         dataType:'json',
         data:params,
+        headers:{
+            authorization:token || null
+        },
         success:function(data){
             console.log(data);
             $('#json').jsonView(data);
