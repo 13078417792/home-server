@@ -15,6 +15,8 @@ class tree{
     protected $separate = '';
     protected $separateKey = '';
     protected $childKey = 'child';
+    protected $statusKey = 'status';
+    protected $statusConvertBoolean = true; // 状态值自动转换布尔值
 
     protected $result = [];
 
@@ -46,6 +48,9 @@ class tree{
                         }
                     }
                 }
+                if($this->statusConvertBoolean){
+                    $temp[$this->statusKey] = !!$temp[$this->statusKey];
+                }
 
                 $children = $this->handle($data,$value[$this->idKey],$level+1);
                 if(!empty($children)){
@@ -59,5 +64,24 @@ class tree{
 
     public function result(){
         return $this->result;
+    }
+
+    public function getDeepChildren(array $data=[]){
+        if(empty($data)){
+            $data = $this->data;
+        }
+        if(count($data)>1){
+            $data = $data[0];
+        }
+        foreach($data as $key => $value){
+            if(!empty($value[$this->childKey]) && is_array($value[$this->childKey])){
+                $this->result = $this->getDeepChildren($value[$this->childKey])->result();
+                return $this;
+            }else{
+                $this->result = $value;
+                return $this;
+            }
+        }
+        return $this;
     }
 }
