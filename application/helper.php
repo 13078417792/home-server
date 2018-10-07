@@ -6,6 +6,7 @@
  * Time: 22:05
  */
 use \app\back\controller\Base as BackBaseController;
+//use crypt;
 function dd($var)
 {
     $arr=debug_backtrace();
@@ -64,5 +65,22 @@ function page2Array($obj,$field='data'){
     }else{
         return $result;
     }
+
+}
+
+function lock($data){
+    return crypt::encrypt($data);
+}
+
+function de_lock($data){
+    return crypt::decrypt($data);
+}
+
+function replace($str,$preg=''){
+    $str = trim($str);
+    if($preg){
+        $str = preg_replace($preg,'',$str);
+    }
+    return $str;
 
 }
