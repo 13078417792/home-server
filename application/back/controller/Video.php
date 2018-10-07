@@ -13,6 +13,7 @@ use \think\Request;
 use \think\Loader;
 use \app\back\model\Video as VideoModel;
 use \app\back\model\UserVideo as UserVideoModel;
+use \app\back\model\VideoCategory as VideoCategoryModel;
 use \Rbac\Rbac;
 class Video extends Base{
 
@@ -158,11 +159,58 @@ class Video extends Base{
         if($this->isSuper){
             unset($data['uid']);
         }
-        // $result = model('UserVideo')->info($data);
         $result = UserVideoModel::get($data);
-        return empty($result)?json2(false,'数据不存在',['error'=>'视频已被删除']):json2(true,'',['info'=>toArray($result)]);
+        if(empty($result)){
+            return json2(false,'数据不存在',['error'=>'视频已被删除']);
+        }else{
+            $result = toArray($result);
+            $path = config('video.PATH').DS.$result['video_id'].DS.'screen';
+            $result['screenshoots'] = [];
+            if($result['is_merge'] && file_exists($path)){
+                $screenshoots = scandir($path);
+                array_shift($screenshoots);
+                array_shift($screenshoots);
+                foreach($screenshoots as $key => $value){
+                    $result['screenshoots'][] = url('@link/images/video_thumb',['link'=>lock($result['video_id'].DS.'screen'.DS.$value)],'');
+                }
+            }
 
-        return $result===false?json2(false,'数据不存在',['error'=>'视频已被删除']):json2(true,'',['info'=>$result]);
+            return json2(true,'',['info'=>$result]);
+        }
+    }
+
+    // 保存视频信息
+    public function updateInfo(){
+        $data = [
+
+        ];
+    }
+
+    // 添加视频分类
+    public function addCategory(){
+        $data = [
+            'name'=>request()->post('name/s',null,'strval'),
+            'alias'=>request()->post('alias/s',null,'strval'),
+            'pid'=>request()->post('pid/d',0,'intval'),
+//            'pid'=>request()->post('category/a',[])
+        ];
+
+        $data['name'] = replace($data['name'],'/[^\x{4e00}-\x{9fa5}]/iu');  // 过滤非汉字字符
+        $data['alias'] = replace($data['alias'],'/[^a-z-]/i');              // 过滤字符(仅匹配大小写英文字符和横杠)
+        $data['pid'] = replace($data['pid'],'/[^\d]/');                     // 过滤字符(仅匹配数字)
+
+//        $data['name'] = preg_replace('/[^\x{4e00}-\x{9fa5}]/iu','',trim($data['name']));    // 过滤非汉字字符
+//        $data['alias'] = preg_replace('/[^a-z-]/i','',trim($data['alias']));                // 过滤字符(仅匹配大小写英文字符和横杠)
+//        $data['pid'] = preg_replace('/[^\d]/','',trim($data['pid']));                       // 过滤字符(仅匹配数字)
+        $result = model('VideoCategory')->add($data);
+        return $result===true?json2(true,'添加成功'):json2(false,'添加失败',['error'=>$result]);
+    }
+
+    public function category(){
+        $category = toArray(VideoCategoryModel::all(['status'=>1]));
+        $tree = new \tree($category);
+        $result = $tree->create()->result();
+        return json2(true,'',['result'=>$result]);
     }
 
 }
