@@ -42,7 +42,8 @@ function token2($name,$type='md5'){
 
 function toArray($val){
     $type = gettype($val);
-    if($type==='array' && count($val)>0 && $val[0] instanceof \think\Model){
+//    if($type==='array' && count($val)>0 && $val[0] instanceof \think\Model){
+    if($type==='array' && count($val)>0 && $val[array_keys($val)[0]] instanceof \think\Model){
         return collection($val)->toArray();
     }elseif($type==='object' && $val instanceof \think\Model){
         return $val->toArray();
