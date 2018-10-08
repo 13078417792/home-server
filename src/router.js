@@ -48,15 +48,19 @@ let routes = [{
     }, {
         path: '/video',
         name: 'video',
-        component: () => import('./views/Video/Video')
+        component: () => import('./views/Video/Video2')
     }, {
         path:'/video/upload',
         name:'video-upload',
-        component: () => import('./views/Video/VideoUpload2'),
+        component: () => import('./views/Video/VideoUpload'),
     }, {
         path:'/video/update',
         name:'video-update',
         component: () => import('./views/Video/VideoUpdate'),
+    }, {
+        path:'/video/category/add',
+        name:'video-category-add',
+        component: () => import('./views/Video/VideoCategoryAdd'),
     }, {
         path:'/404',
         name:'not-found',
