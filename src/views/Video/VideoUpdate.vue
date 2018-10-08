@@ -96,7 +96,7 @@
                                 class="el-switch"
                                 active-color="#00A1D6"
                                 inactive-color="#CCD0D7"
-                                :disabled="!!form.is_private">
+                                :disabled="!form.is_private">
                         </el-switch>
                         <el-input
                                 v-if="is_share"
@@ -174,17 +174,6 @@
                 console.log(data)
                 if(data.success){
                     this.$success(data.msg || '保存成功')
-                    // this.form = {
-                    //     id:null,
-                    //     thumb:null,
-                    //     title:null,
-                    //     tag:[],
-                    //     intro:null,
-                    //     is_private:false,
-                    //     share:null,
-                    //     category:[]
-                    // }
-                    // this.$refs.form.resetFields()
                     this.submited = true
                     setTimeout(()=>{
                         this.$router.push({name:'video'})
@@ -254,9 +243,9 @@
 
             },
             privateChange(value){
-                if(value){
-                    this.form.share = null
+                if(!value){
                     this.is_share = false
+                    this.form.share = null
                 }
             },
             shareSwitchChange(value){
