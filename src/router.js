@@ -52,7 +52,7 @@ let routes = [{
     }, {
         path:'/video/upload',
         name:'video-upload',
-        component: () => import('./views/Video/VideoUpload'),
+        component: () => import('./views/Video/VideoUpload2'),
     }, {
         path:'/video/update',
         name:'video-update',
