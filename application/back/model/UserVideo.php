@@ -102,7 +102,7 @@ class UserVideo extends \think\Model{
             $data['time'] = $_SERVER['REQUEST_TIME'];
             $data['status'] = 1;
 
-            if($data['is_private']){
+            if(!$data['is_private']){
                 $data['share'] = null;
             }
 
