@@ -48,30 +48,45 @@
                             <el-input v-model="form.title"></el-input>
                         </el-form-item>
                         <el-form-item label="标签">
-                            <el-input v-model="form.tag"></el-input>
+                            <div>
+                                <el-tag
+                                        :key="index"
+                                        v-for="(tag,index) in form.tag"
+                                        closable
+                                        :disable-transitions="false"
+                                        class="tags"
+                                        @close="cancelTag(tag)">
+                                    {{tag}}
+                                </el-tag>
+                            </div>
+
+                            <el-input @blur="addTag" @keyup.enter.native="addTag"></el-input>
                         </el-form-item>
                         <el-form-item label="简介">
                             <el-input type="textarea" :rows="6" v-model="form.intro"></el-input>
                         </el-form-item>
 
-                        <el-form-item label="加入私密库">
+                        <el-form-item label="加入私密库" class="form-item">
                             <el-switch
-                                    v-model="form.private"
+                                    class="el-switch"
+                                    v-model="form.is_private"
                                     active-color="#00A1D6"
-                                    inactive-color="#CCD0D7">
+                                    inactive-color="#CCD0D7"
+                                    @change="privateChange">
                             </el-switch>
                         </el-form-item>
 
-                        <el-form-item label="是否分享">
+                        <el-form-item label="是否分享" class="form-item">
                             <el-switch
+                                    class="el-switch"
                                     v-model="form.is_share"
                                     active-color="#00A1D6"
-                                    inactive-color="#CCD0D7">
+                                    :disabled="form.is_private"
+                                    inactive-color="#CCD0D7"
+                                    @change="isShareChange">
                             </el-switch>
-                        </el-form-item>
 
-                        <el-form-item label="分享密码" v-if="form.is_share">
-                            <el-input v-model="form.share"></el-input>
+                            <el-input v-if="form.is_share" v-model="form.share"></el-input>
                         </el-form-item>
 
                         <el-form-item>
@@ -114,9 +129,9 @@
                 form:{
                     id:null,
                     title:null,
-                    tag:null,
+                    tag:[],
                     intro:null,
-                    private:false,
+                    is_private:false,
                     is_share:false,
                     share:null
                 },
@@ -133,6 +148,33 @@
             }
         },
         methods:{
+            addTag({target,srcElement}){
+                const el = target || srcElement
+                const value = el.value.trim().replace(/\s*/g,'')
+                if(!value || this.form.tag.indexOf(value)>=0){
+                    el.value = ''
+                    return
+                }
+                this.form.tag.push(value)
+                el.value = ''
+            },
+            cancelTag(tag){
+                if(tag && this.form.tag.indexOf(tag)>=0){
+                    this.form.tag.splice(this.form.tag.indexOf(tag),1)
+                }
+
+            },
+            privateChange(value){
+                if(value){
+                    this.form.is_share = false;
+                    this.form.share = null
+                }
+            },
+            isShareChange(value){
+                if(value){
+                    this.form.share = null
+                }
+            },
             // 拖曳上传
             drop(e){
                 const files = e.dataTransfer.files
@@ -163,6 +205,7 @@
                 const self = this
                 this.file = file
                 this.extname = file.name.replace(/.+\.(.+)$/,'$1')
+                this.form.title = file.name.replace(/\..+$/,'')
                 this.uploadInfo.totalSize = (file.size / Math.pow(1024,2)).toFixed(2) + 'MB' // 文件总大小
 
                 const cut = new cutWorker()
@@ -192,6 +235,7 @@
                     const md5 = event.data.md5
                     this.file_md5 = md5
 
+                    return;
                     const {data} = await this.$http.post('/back/video/beforeUploadCheck',{
                         md5
                     })
@@ -303,6 +347,35 @@
                     &:first-child{
                         margin-top:0;
                     }
+
+
+
+                    .info-form{
+
+                        .tags{
+                            margin-right:1em;
+
+                            &:last-child{
+                                margin-right:0;
+                            }
+                        }
+
+                        .form-item{
+                            position:relative;
+
+                            .el-switch{
+                                position:absolute;
+                                top:-42px;
+                                left:90px;
+                            }
+
+                        }
+                    }
+
+
+
+
+
                 }
 
                 .progress-container{
