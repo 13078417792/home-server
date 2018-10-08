@@ -84,7 +84,48 @@ class VideoCategory extends \think\Model{
 
     }
 
-    public function category(){
+    public function category($tree=true,$status=null,$condition=[]){
+        $where = [];
+        if($status===true){
+            $where = ['status'=>1];
+        }elseif($status===false){
+            $where = ['status'=>0];
+        }
+//        if(array_key_exists('status',$condition)){
+//            unset($condition['status']);
+//        }
+        $where = array_merge($condition,$where);
+        $result = toArray(self::all($where));
+        if($tree){
+            $result = (new \tree($result))->create()->result();
+        }
+        return $result;
+    }
 
+    public function getTreeSub(array $data,array $id,array $field=[]){
+        $result = [];
+        foreach($data as $key => $value){
+            if(in_array($value['id'],$id)){
+                if(empty($field)){
+                    unset($value['child']);
+                    $result[] = $value;
+                }else{
+                    $temp = [];
+                    foreach($field as $name => $alias){
+                        if(is_integer($name)){
+                            $temp[$alias] = $value[$alias];
+                        }else{
+                            $temp[$alias] = $value[$name];
+                        }
+
+                    }
+                    $result[] = $temp;
+                }
+            }
+            if(array_key_exists('child',$value)){
+                $result = array_merge($result,$this->getTreeSub($value['child'],$id,$field));
+            }
+        }
+        return $result;
     }
 }
