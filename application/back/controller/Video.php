@@ -14,6 +14,7 @@ use \think\Loader;
 use \app\back\model\Video as VideoModel;
 use \app\back\model\UserVideo as UserVideoModel;
 use \app\back\model\VideoCategory as VideoCategoryModel;
+use \app\back\model\VideoTag as VideoTagModel;
 use \Rbac\Rbac;
 class Video extends Base{
 
@@ -137,12 +138,12 @@ class Video extends Base{
         // 超管或普通管理员可以接受[仅查看自己上传的视频(myself)]参数
         if($super || $manager){
             request()->post('myself/d',0,'intval') && $condition['uid'] = $user_info['id'];
-            $private = !array_key_exists('private',$_POST)?true:(bool)$_POST['private'];
-            if($super && !$manager && !$private){
-                unset($condition['is_private']); // 超管可以查看任何用户的私密库视频（嘿嘿嘿）
-            }
         }else{
             $condition['uid'] = $user_info['id'];
+        }
+
+        if(array_key_exists('status',$_POST)){
+            $condition['status'] = request()->post('status/d',1,'intval');
         }
 
         $result = model('UserVideo')->video_list($condition,$user_info);
@@ -175,6 +176,14 @@ class Video extends Base{
                 }
             }
 
+            $tags = explode(',',$result['tag']);
+            $tags = VideoTagModel::where([
+                'id'=>['in',$tags]
+            ])->column('id,name');
+            $result['tag'] = implode(',',$tags);
+
+
+            $result['is_private'] = !!$result['is_private'];
             return json2(true,'',['info'=>$result]);
         }
     }
@@ -182,8 +191,35 @@ class Video extends Base{
     // 保存视频信息
     public function updateInfo(){
         $data = [
-
+            'id'=>request()->post('id/d',null,'intval'),
+            'title'=>request()->post('title/s',null,'strval'),
+            'tag'=>request()->post('tag/a',[]),
+            'category'=>request()->post('category/a',[]),
+            'intro'=>request()->post('intro/s',null,'strval'),
+            'is_private'=>request()->post('is_private/d',0,'intval'),
+            'is_share'=>request()->post('is_share',0,'intval'),
+            'share'=>request()->post('share/s',null,'strval'),
+            'thumb'=>request()->post('thumb/s',null,'strval')
         ];
+
+        foreach($data['tag'] as &$value){
+            $value = replace($value,'/[^\x{4e00}-\x{9fa5}a-z0-9]/iu');
+            unset($value);
+        }
+
+//        dd($data['category']);
+        foreach($data['category'] as $key => &$value){
+            $value = replace($value,'/[^\d]/','');
+            if(empty($value)){
+                unset($data[$key]);
+            }
+            unset($value);
+        }
+
+
+
+        $result = model('UserVideo')->updateInfo($data);
+        return $result===true?json2(true,'修改成功',['data'=>$data,'share'=>$data['share']]):json2(false,'修改失败',['error'=>$result]);
     }
 
     // 添加视频分类
@@ -199,9 +235,6 @@ class Video extends Base{
         $data['alias'] = replace($data['alias'],'/[^a-z-]/i');              // 过滤字符(仅匹配大小写英文字符和横杠)
         $data['pid'] = replace($data['pid'],'/[^\d]/');                     // 过滤字符(仅匹配数字)
 
-//        $data['name'] = preg_replace('/[^\x{4e00}-\x{9fa5}]/iu','',trim($data['name']));    // 过滤非汉字字符
-//        $data['alias'] = preg_replace('/[^a-z-]/i','',trim($data['alias']));                // 过滤字符(仅匹配大小写英文字符和横杠)
-//        $data['pid'] = preg_replace('/[^\d]/','',trim($data['pid']));                       // 过滤字符(仅匹配数字)
         $result = model('VideoCategory')->add($data);
         return $result===true?json2(true,'添加成功'):json2(false,'添加失败',['error'=>$result]);
     }
@@ -211,6 +244,53 @@ class Video extends Base{
         $tree = new \tree($category);
         $result = $tree->create()->result();
         return json2(true,'',['result'=>$result]);
+    }
+
+    public function setStatus(){
+        $id = request()->post('id/d',null,'intval');
+        $status = request()->post('status/d',null,'intval');
+        $status = array_key_exists('status',$_POST)?$_POST['status']:null;
+        $status = $status?1:0;
+        if(!$id || $status===null){
+            return json2(false,'操作失败');
+        }
+
+        $model = UserVideoModel::get($id);
+        // 超管无视帐号限制
+        if(!$this->isSuper && $model->uid!==$this->uid){
+            return json2(false,'操作失败');
+        }
+
+        if(empty($model)){
+            return json2(false,'操作失败');
+        }
+        if($model->status===$status){
+            return json2(true,'操作成功');
+        }else{
+            $model->save(['status'=>$status]);
+            return json2(true,'操作成功');
+        }
+
+    }
+
+    public function deleteVideo(){
+        $id = request()->post('id/d',null,'intval');
+        if(!$id){
+            return json2(false,'操作失败');
+        }
+
+        $model = UserVideoModel::get($id);
+        // 超管无视帐号限制
+        if(!$this->isSuper && $model->uid!==$this->uid){
+            return json2(false,'操作失败');
+        }
+
+        if(empty($model)){
+            return json2(false,'操作失败');
+        }
+        $result = $model->delete();
+        return $result?json2(true,'操作成功'):json2(false,'操作失败');
+
     }
 
 }
