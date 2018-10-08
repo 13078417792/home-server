@@ -20,6 +20,7 @@ class Base extends \think\Validate{
         parent::__construct($rules,$message,$field);
         if(!$this->dbName){
             $this->dbName = strtolower(basename(get_class($this)));
+            $this->dbName = preg_replace('/.+\\\\/i','',$this->dbName);
         }
     }
 
