@@ -111,8 +111,8 @@ class Video extends Base{
         if(!empty($detail)){
             // 秒传
             $exist = $detail->user()->where(['is_merge'=>1])->find();
-            $detail->user()->save(['uid'=>$this->user_auth_info['id'],'status'=>-1,'is_merge'=>$exist?1:0,'time'=>$_SERVER['REQUEST_TIME']]);
-            return json2(true,'',['quick'=>true,'token'=>$token]);
+            $save_data = $detail->user()->save(['uid'=>$this->user_auth_info['id'],'status'=>-1,'is_merge'=>$exist?1:0,'time'=>$_SERVER['REQUEST_TIME']]);
+            return json2(true,'',['quick'=>true,'token'=>$token,'id'=>$save_data['id']]);
         }
         $path = config('video.PATH').DS.$md5;
         if(file_exists($path)){
@@ -291,6 +291,57 @@ class Video extends Base{
         $result = $model->delete();
         return $result?json2(true,'操作成功'):json2(false,'操作失败');
 
+    }
+
+    // 上传封面图
+    public function uploadThumb(){
+        $thumb = request()->file('thumb');
+        if(empty($thumb)){
+            return json2(false,'必须上传图片');
+        }
+        if(is_array($thumb)){
+            return json2(false,'仅允许上传单个封面图');
+        }
+        $path = config('video.PATH');
+//        最大2M
+        $info = $thumb->validate(['size'=>2*1024*1024,'ext'=>'jpg,png'])->move($path.DS.'thumb');
+        if($info){
+            $link = lock('thumb'.DS.$info->getSaveName());
+            $src = url('@link/Images/video_thumb',['link'=>$link],'');
+            return json2(true,'上传成功',['thumb'=>$src]);
+        }else{
+            return json2(false,'上传失败',['error'=>$thumb->getError()]);
+        }
+
+//        $thumb
+    }
+
+    // 获取视频截图
+    public function getScreenshoots(){
+        $video_id = request()->post('video/s',null,'strval');
+        if(empty($video_id)){
+            return json2(true,'截图未生成',['finished'=>false]);
+        }
+        $path = config('video.PATH');
+        $path = $path.DS.$video_id.DS.'screen';
+        if(is_dir($path)){
+            $files = scandir($path);
+            array_shift($files);
+            array_shift($files);
+            if(count($files)>=5){
+
+                $result = [];
+                foreach($files as $key => $value){
+                    $result[] = url('@link/Images/video_thumb',['link'=>lock($video_id.DS.'screen'.DS.$value)],'');
+                }
+
+                return json2(true,'截图已生成',['screenshoots'=>$result,'finished'=>true]);
+            }else{
+                return json2(true,'截图未生成',['finished'=>false]);
+            }
+        }else{
+            return json2(true,'截图未生成',['finished'=>false]);
+        }
     }
 
 }
