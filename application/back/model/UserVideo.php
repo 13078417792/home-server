@@ -74,6 +74,12 @@ class UserVideo extends \think\Model{
 
         if($valid){
 
+//            验证视频标题唯一性
+            $unique = self::get(['title'=>$data['title'],'id'=>['neq',$data['id']]]);
+            if(!empty($unique)){
+                return '标题已存在';
+            }
+
             $tag = $data['tag'];
             $model = model('VideoTag');
             $tagIDArray = $model->saveTag($tag);
@@ -110,9 +116,7 @@ class UserVideo extends \think\Model{
             if(empty($data['category'])){
                 return '必须选择分类';
             }
-//            dd($data['category']);
             $category = VideoCategory::where(['id'=>['in',$data['category']],'status'=>1])->column('id,name');
-//            dd($category);
             if(count($data['category'])!=count($category)){
                 $diff = [];
                 foreach($category as $key => $value){
@@ -126,7 +130,7 @@ class UserVideo extends \think\Model{
             $data['category'] = implode(',',$data['category']);
 
             $this->where('id',$id)->update($data);
-//            dd($data);
+
             return true;
         }else{
 
