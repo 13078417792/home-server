@@ -68,13 +68,13 @@ class UserVideo extends \think\Model{
     }
 
     public function updateInfo(array $data){
-//        dd($data);
+
         $validate = validate('UserVideo');
         $valid = $validate->scene('update')->check($data);
 
         if($valid){
 
-//            验证视频标题唯一性
+            // 验证视频标题唯一性
             $unique = self::get(['title'=>$data['title'],'id'=>['neq',$data['id']]]);
             if(!empty($unique)){
                 return '标题已存在';
@@ -130,6 +130,69 @@ class UserVideo extends \think\Model{
             $data['category'] = implode(',',$data['category']);
 
             $this->where('id',$id)->update($data);
+
+            return true;
+        }else{
+
+            return $validate->getError();
+        }
+    }
+
+    public function addInfo(array $data){
+
+        $validate = validate('UserVideo');
+        $valid = $validate->scene('add')->check($data);
+
+        if($valid){
+
+            $tag = $data['tag'];
+            $model = model('VideoTag');
+            $tagIDArray = $model->saveTag($tag);
+            $data['tag'] = implode(',',$tagIDArray);
+//            dd($data);
+            $data['is_private'] = $data['is_private']?1:0;
+            if($data['is_share']){
+
+                if(!empty($data['share'])){
+//                    $data['share'] = replace($data['share'],'/[^a-z\d]/i');
+                    if(preg_match_all('/[^a-z\d]/i',$data['share'])){
+                        return '分享密码只能是大小写英文字符和数字';
+                    }
+                    $share_len = strlen($data['share']);
+                    if($share_len>15 || $share_len<5){
+                        return '分享密码的长度在5-15位之间';
+                    }
+                    $data['share'] = replace($data['share'],'/[^a-z\d]/i');
+                }
+            }else{
+                $data['share'] = null;
+            }
+            unset($data['is_share']);
+            $data['time'] = $_SERVER['REQUEST_TIME'];
+            $data['status'] = 1;
+
+            if(!$data['is_private']){
+                $data['share'] = null;
+            }
+
+            // 验证分类
+            if(empty($data['category'])){
+                return '必须选择分类';
+            }
+            $category = VideoCategory::where(['id'=>['in',$data['category']],'status'=>1])->column('id,name');
+            if(count($data['category'])!=count($category)){
+                $diff = [];
+                foreach($category as $key => $value){
+                    if(in_array($key,$data['category'])){
+                        $diff[] = $value;
+                    }
+                }
+                $diff = implode(',',$diff);
+                return $diff.'不存在';
+            }
+            $data['category'] = implode(',',$data['category']);
+
+            $this->save($data)->allowField(true)->save();
 
             return true;
         }else{
