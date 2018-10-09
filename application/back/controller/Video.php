@@ -31,6 +31,7 @@ class Video extends Base{
 
     // 上传必须的token
     static public $upload_token = 'uploadVideo_';
+    public $infoActionType = 'update';
 
     protected function _initialize(){
         parent::_initialize();
@@ -95,7 +96,74 @@ class Video extends Base{
 
         $model = model('Video');
         $result = $model->upload($data,$token,$this->user_auth_info);
-        return $result===true?json2(true,'上传成功',['id'=>$model->video_id]):json2(false,'上传失败',['error'=>$result]);
+        return $result===true?json2(true,'上传成功'):json2(false,'上传失败',['error'=>$result]);
+    }
+
+    public function upload4(){
+
+        $data = [
+            'md5'=>request()->post('unique/s',null,'strval'), // 文件MD5,
+            'file'=>request()->file('file'),
+            'index'=>request()->post('index/d',null,'intval'),
+            'end'=>request()->post('end/d',null,'intval')
+        ];
+        $token = request()->post('token/s',null,'strval');
+
+        $uid = $this->user_auth_info['id'];
+
+        // 验证上传token
+        if(empty($data['md5']) || !$token || self::validate_upload_token($uid,$token,$data['md5']===false)){
+            return json2(false,'操作失败',['error'=>'上传失败','valid'=> self::validate_upload_token($uid,$token,$data['md5']) ]);
+        }
+
+        // 开始验证
+        if(empty($data['file'])){
+            return json2(false,'操作失败',['error'=>'没有文件被上传']);
+        }
+        $file = $data['file'];
+        if(!$file instanceof \think\File){
+            return json2(false,'操作失败',['error'=>'非法的文件']);
+        }
+        if((empty($data['index']) && $data['index']!=0) || empty($data['end'])){
+            return json2(false,'操作失败',['error'=>'缺少必须数据']);
+        }
+
+        $file_dir = config('video.PATH').DS.$data['md5'];
+        $info = $file->validate(['ext'=>'mp4,rmvb,flv,mkv,avi']);
+        if($info){
+            if(!file_exists($file_dir.DS.$data['index'].'.'.$info->getExtension())){
+                $info->move($file_dir,$data['index']);
+            }
+            $extends = [];
+            if($data['end']===$data['index']){
+                $model = VideoModel::get($data['md5']);
+                if(empty($model)){
+                    $model = model('Video');
+                    $model->data(['id'=>$data['md5'],'end'=>$data['end'],'time'=>$_SERVER['REQUEST_TIME'],'path'=>$file_dir])->save();
+                    $relation = $model->user();
+                }else{
+                    $relation = $model->user();
+                }
+
+                $relation = $relation->save(['uid'=>$uid,'status'=>-1,'is_merge'=>0,'time'=>$_SERVER['REQUEST_TIME']]);
+                $extends['id'] = $relation->id;
+                if( !file_exists($file_dir.DS.'merge')){
+                    $ch = curl_init('http://127.0.0.1:8999/merge-video');
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                        'Content-Type' => 'multipart/form-data',
+                    ]);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, ['path' => $data['md5']]);
+                    curl_exec($ch);
+                    curl_close($ch);
+                }
+            }
+
+            return json2(true,'操作成功',$extends);
+        }else{
+            return json2(false,'操作失败',['error'=>$info->getError()]);
+        }
     }
 
     // 上传前的检测，是否秒传,并返回上传token
@@ -112,13 +180,27 @@ class Video extends Base{
             // 秒传
             $exist = $detail->user()->where(['is_merge'=>1])->find();
             $save_data = $detail->user()->save(['uid'=>$this->user_auth_info['id'],'status'=>-1,'is_merge'=>$exist?1:0,'time'=>$_SERVER['REQUEST_TIME']]);
+
             return json2(true,'',['quick'=>true,'token'=>$token,'id'=>$save_data['id']]);
         }
         $path = config('video.PATH').DS.$md5;
-        if(file_exists($path)){
+        if(is_dir($path)){
             $list = @scandir($path);
             array_shift($list);
             array_shift($list);
+            foreach($list as $key => $value){
+                if(is_dir($value)){
+                    unset($list[$key]);
+                    continue;
+                }
+                $extname = pathinfo($path.DS.$value,PATHINFO_EXTENSION);
+                if(!in_array($extname,['mp4','avi','rmvb','flv','mkv','avi'])){
+                    unset($list[$key]);
+                    continue;
+                }
+            }
+            $model = model('Video');
+//            $model->data(['id'=>$md5,'end'=>])->save();
             return json2(true,'',['quick'=>true,'continue'=>true,'list'=>$list,'token'=>$token]);
         }else{
             return json2(true,'',['quick'=>false,'continue'=>false ,'token'=>$token]);
@@ -219,6 +301,39 @@ class Video extends Base{
 
 
         $result = model('UserVideo')->updateInfo($data);
+        return $result===true?json2(true,'操作成功',['data'=>$data,'share'=>$data['share']]):json2(false,'操作失败',['error'=>$result]);
+    }
+
+    // 添加视频
+    public function addInfo_adasdasdasdasdadasdasdasd(){
+        $data = [
+            'title'=>request()->post('title/s',null,'strval'),
+            'tag'=>request()->post('tag/a',[]),
+            'category'=>request()->post('category/a',[]),
+            'intro'=>request()->post('intro/s',null,'strval'),
+            'is_private'=>request()->post('is_private/d',0,'intval'),
+            'is_share'=>request()->post('is_share',0,'intval'),
+            'share'=>request()->post('share/s',null,'strval'),
+            'thumb'=>request()->post('thumb/s',null,'strval')
+        ];
+
+        foreach($data['tag'] as &$value){
+            $value = replace($value,'/[^\x{4e00}-\x{9fa5}a-z0-9]/iu');
+            unset($value);
+        }
+
+//        dd($data['category']);
+        foreach($data['category'] as $key => &$value){
+            $value = replace($value,'/[^\d]/','');
+            if(empty($value)){
+                unset($data[$key]);
+            }
+            unset($value);
+        }
+
+
+
+        $result = model('UserVideo')->addInfo($data);
         return $result===true?json2(true,'操作成功',['data'=>$data,'share'=>$data['share']]):json2(false,'操作失败',['error'=>$result]);
     }
 
