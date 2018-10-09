@@ -44,9 +44,52 @@
                     <el-form class="info-form" label-position="top" :model="form">
                         <input type="hidden" v-model="form.id">
 
+                        <el-form-item label="视频封面设置">
+
+                            <div class="thumb-part">
+                                <div class="thumb" >
+                                    <input type="file" id="file" @change="uploadThumb">
+                                    <img :src="form.thumb || screenshoots[0] || thumb_dataurl" alt="" v-if="!!form.thumb || !$empty(screenshoots) || thumb_dataurl">
+                                    <img v-else src="data:image/png;base64,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" alt="">
+                                    <span>上传封面</span>
+                                </div>
+
+                                <div class="more-thumb">
+
+                                    <p class="thumb-list-tips">
+                                        <template v-if="form.id && !$empty(screenshoots)">
+                                            可选封面，系统会默认选中第一张作为视频封面。
+                                        </template>
+                                        <template v-else>
+                                            等待上传完毕后生成封面图
+                                        </template>
+
+                                    </p>
+
+                                    <ul class="list" v-if="!$empty(screenshoots)">
+
+
+                                        <template v-for="item in 5">
+
+                                            <li class="list-item" :key="item" v-if="screenshoots[item-1]" @click="selectThumb" title="选择这张图片作为封面图">
+                                                <img :src="screenshoots[item-1]" alt="" >
+                                            </li>
+                                            <li class="list-item default-thumb" :key="item" v-else>
+                                                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAmCAYAAAC29NkdAAAAAXNSR0IArs4c6QAABkBJREFUWAnNWH1sU1UUv/e+tivSbXyJDIMioAgEIVHRiPOTBKJRiYR2w0g3GLbLcGIg8geYNChExQgZ7KOGpdsSoWsRYvxINFEi8SMkmomAM/4xQDQDAwKyuq++d/zdjte8vbZvYyvDl73de849H793zrnn3VfG/ucXH2l8gUDEUXA7PSX9tp9u/SQQCMStMAirxeuwxgvuoFqm8IPyLpg66y34sAzSiAKsbWouY5yvSj44Z8Vv19e7knSayYAAg8FIfhq9a2bV1YfnCeLvGBWJ8xOdZ850GnnmecbwBpsitxHR+1CYzRlv0ZgaKPcWt5gNDIZGlHLH2F1fIpv3J+WJ/c009piv1H0syUszyRhBgCvmnC/GPQVV8iznyuFgQ+TNmpoPxqaxY8nKt7m29gMHaSJtw0DgpNGMABFah9EraBekNwmX/ZvahuZlxjWrebApvBzrFUYZPHzIX1IUMvIyzTMCJC0ehtJJsyKAzhaC769rjESrm8KzzOtGOtgQnk4kqpCFpB9idFyLxdcb5azmGWtQKu2q3zfZblNeg9AapPkmsyE4u8iJvXsp3rFr4+rVV4zrVVVVOY78SZ9yzp7U+cRYB4+ri3yrio/ovIFGS4C6cnUoMl8RLMAZGizndp2vj0SshXHa7F/p+UznBRubt0D2dZ3GqGrE1pV73bsNvAGnKQB3N+ydY2e2YkRsLrSdiBJh3sMINcn5Qiik7VuoKw3r30InBlk7HuYR08PABh1GFFUjKnQI/NEVIv4d7+re5/O92N5/3UDVNTX7IS27e1Z6n8H0oKZ4yFOMtDJ/STFaUt+VjGAw1LyUBPvQWNC60EiOyNcFlWuFFSuLWqVfm/wXCIWcpMga69ttSMNfTKO9JPh5gW0oZa7XpXGucY0mMMFXIFoTkfDxNuIb4a9E+kxEUG4Cm8J+AK2gTno1zp4pX+n5XAqM1IX39GJB7GNZt0j1mcvxjjmyMySio3B1PIAoCTCcn+9S/x10G8jWAyR8wncfBubKs+XmyXkCoMZFshZRAxqpo69rWtM9lPQpfZvXEjVoZmaiZa0WsJypGhPzhSJEexvbHwi4ezLJS37ioGBzPS/bC/yfUFnP72u93gtWOsY1S4DybWDLvXkB3lT3CcEWoL/NwxFpKsI7ShqZNI3NwLDFaNA8z7flrkKl75Qp4kxRBTnPBRsjbeivrZx4S2dv/MC6NSvOmfV0Oi1AZ08vLV8eURz5rBG7yqMLyy2VrAXpkNgTGCwBAshYdAfdhIJNMBnEZPAelmynQ3kOvp6WPpk95SWV/jTTPaqHCgvP2gBuoW7ZPCZaEVHUzDfTam88hNr6SO5M2SHM6+i7dy9adFFIn+Y1SSNbqZcs2MrKym6c2qLyQADNNqT3C9A7NKLVcPhQV3f8Hl+JpzpVuz9nbdkLp/1e91Lexecyjd/LmOYG0DckaNj8UdOoxufz9WbamGlTrLtob2vdMO7WGe8pPY5LFRXuDp0/lNHnc1+G3rGrdyLysoyiUU+/d7PZtiVAfBLKbf+HWSlbdDTqtgQn/aRNcbYAZMOOZQStHFTvicyw2WkzzlibcMb7c/v2ptG5E3N2oK4O+Us8+6RuTX1kpmKnrdggX/u9Rbus7GVaG3IEhU17AC3Di3Pf49J43gTnNOxIefKu1J0pCnsUzWgZ+miRzrvWccgRZHF2lNkTbWNbXWM4j3DAkN0OIB/E98orpKlH0SjXy86JTvDVtQLT5YccwfKyouPYQdsAaAoiVA1wS9A6LgDNz+ifO4WiHALau+DomKryAduRDsg8Dj2CsFTu9QRqGyNHBadC9MpYnNSwvfvKSZYz1ouIzkTP+03VxIGKUvdZs+PB0sMCKJ1ggxzEIG/jVWskhjNPSTHSQ1yJpRx7huNkMLqZfCYAkkayy/e9C4nl55Bj3GCMZlPGwUbdidiMlzZxkOjq0mIxOU+kuEOL/TpGuNpQ1NOxmqsotmBtKFzPhbD8cVEaGO6FHokTHN3CmXgZvp199ujIq6WlMmhgXb3ww9BLeK8EdfqGjURd+BB/AgeM7yWGZA22n/plD5Isv4n7Un0DEKJf/gO3fh2chJCMoI6nLhRZAtgl2CyzATX1BKkLZnFERDpxBDuiEg+iJf1kNP0fXUUuYvXiuKMAAAAASUVORK5CYII" alt="">
+                                            </li>
+
+                                        </template>
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </el-form-item>
+
                         <el-form-item label="标题">
                             <el-input v-model="form.title"></el-input>
                         </el-form-item>
+
+
                         <el-form-item label="标签">
                             <div>
                                 <el-tag
@@ -62,6 +105,21 @@
 
                             <el-input @blur="addTag" @keyup.enter.native="addTag"></el-input>
                         </el-form-item>
+
+                        <el-form-item label="分类" prop="category">
+                            <el-cascader
+                                    :props="{
+                                    value:'id',
+                                    label:'name',
+                                    children:'child'
+                                }"
+                                    :options="category"
+                                    v-model="form.category">
+                            </el-cascader>
+
+                        </el-form-item>
+
+
                         <el-form-item label="简介">
                             <el-input type="textarea" :rows="6" v-model="form.intro"></el-input>
                         </el-form-item>
@@ -81,7 +139,7 @@
                                     class="el-switch"
                                     v-model="form.is_share"
                                     active-color="#00A1D6"
-                                    :disabled="form.is_private"
+                                    :disabled="!form.is_private"
                                     inactive-color="#CCD0D7"
                                     @change="isShareChange">
                             </el-switch>
@@ -90,7 +148,7 @@
                         </el-form-item>
 
                         <el-form-item>
-                            <el-button type="primary">立即保存</el-button>
+                            <el-button type="primary" @click.stop="submit">立即保存</el-button>
                         </el-form-item>
                     </el-form>
 
@@ -105,8 +163,12 @@
 <script>
     import cutWorker from '@/workers/video/cut.worker'
     import md5Worker from '@/workers/video/md5-chunk.worker'
+    import {mapGetters} from 'vuex'
     export default {
         name: "VideoUpload",
+        created(){
+            this.$store.dispatch('video/getCategory')
+        },
         data(){
             return {
                 file:null,
@@ -126,6 +188,7 @@
                     uploadedSize:0, // 已上传文件的大小
                     totalSize:0 // 文件总大小
                 },
+                screenshoots:[], // 视频截图，视频上传完成后轮询获取截图
                 form:{
                     id:null,
                     title:null,
@@ -133,8 +196,11 @@
                     intro:null,
                     is_private:false,
                     is_share:false,
-                    share:null
+                    share:null,
+                    category:[],
+                    thumb:null
                 },
+                thumb_dataurl:null,
                 continue_list:[], // 续传，已上传的片段索引
                 upload_token:null,
                 test_files:[],
@@ -143,11 +209,58 @@
             }
         },
         computed:{
+            ...mapGetters('video',[
+                'category'
+            ]),
             emptyVideo(){
                 return this.$empty(this.file)
             }
         },
         methods:{
+            selectThumb(){},
+            async uploadThumb({target,srcElement}){
+                const el = target || srcElement
+                let file = el.files
+                if(!file.length){
+                    return
+                }
+                file = file[0]
+                console.log(file)
+                if(!/^image\/(jpe?g|png)$/.test(file.type)){
+                    this.$tips('不是图片，支持JPG,PNG格式','error')
+                    return
+                }
+                if(file.size > 2*1024*1024){
+                    this.$tips('文件太大，不能超过2M','error')
+                    return
+                }
+
+                let reader = new FileReader()
+                reader.addEventListener('load',()=>{
+                    this.thumb_dataurl = reader.result
+                })
+
+                reader.readAsDataURL(file)
+
+                let form = new FormData()
+                form.append('thumb',file)
+                const {data} = await this.$http.post('/back/video/uploadThumb',form)
+                if(data.success){
+                    console.log(data)
+                    this.form.thumb = data.thumb
+                }
+            },
+            async submit(){
+                if(!this.form.id){
+                    this.$tips('等待上传完毕后再提交视频信息','info')
+                    return
+                }
+                const {data} = await this.$http.post('/back/video/updateInfo',this.form)
+                if(data.success){
+                    this.$success(data.msg || '操作成功')
+                    this.$router.push({name:'video'})
+                }
+            },
             addTag({target,srcElement}){
                 const el = target || srcElement
                 const value = el.value.trim().replace(/\s*/g,'')
@@ -165,7 +278,7 @@
 
             },
             privateChange(value){
-                if(value){
+                if(!value){
                     this.form.is_share = false;
                     this.form.share = null
                 }
@@ -235,7 +348,7 @@
                     const md5 = event.data.md5
                     this.file_md5 = md5
 
-                    return;
+                    // return;
                     const {data} = await this.$http.post('/back/video/beforeUploadCheck',{
                         md5
                     })
@@ -252,6 +365,7 @@
                             uploadedSize:this.uploadInfo.totalSize, // 已上传文件的大小
                         }
                         this.uploadStatus = 'finished'
+                        this.getScreenShoots()
                         this.$success('秒传完成')
                         return ;
                     }
@@ -299,6 +413,7 @@
                     })
                 }else{
                     this.uploadStatus = 'finished'
+                    this.getScreenShoots()
                     this.$success('上传完成')
                 }
             },
@@ -326,6 +441,19 @@
                     })
                 })
 
+            },
+            async getScreenShoots(){
+                const {data} = await this.$http.post('/back/video/getScreenshoots',{
+                    video:this.file_md5
+                })
+                if(data.finished){
+                    this.screenshoots = new Array(...data.screenshoots)
+                    if(!this.form.thumb || !/^http/.test(this.form.thumb)){
+                        this.form.thumb = this.screenshoots[0]
+                    }
+                }else{
+                    setTimeout(this.getScreenShoots,1500)
+                }
             }
         }
     }
@@ -373,7 +501,135 @@
                     }
 
 
+                    .thumb-part{
+                        margin-top:1em;
 
+                        @thumb-width:15em;
+                        @thumb-height:@thumb-width*(1080/1920);
+                        .thumb{
+                            width:@thumb-width;
+                            height:@thumb-height;
+                            position:relative;
+                            border-radius:5px;
+                            overflow:hidden;
+                            cursor:pointer;
+                            float:left;
+                            // margin-right:3.5em;
+
+                            img{
+                                position:absolute;
+                                top:0;
+                                bottom:0;
+                                left:0;
+                                right:0;
+                                margin:auto;
+                                display:block;
+                                max-width:100%;
+                                max-height:100%;
+                            }
+
+                            span{
+                                position:absolute;
+                                right:0;
+                                bottom:0;
+                                font-size:.6em;
+                                padding:3px;
+                                background-color:rgba(0,0,0,.45);
+                                color:#fff;
+                                border-top-left-radius:5px;
+                            }
+
+                            #file{
+                                width:100%;
+                                height:100%;
+                                display:block;
+                                filter:opacity(0);
+                                position:absolute;
+                                top:0;
+                                left:0;
+                                z-index:2;
+                                cursor:pointer;
+                            }
+                        }
+
+                        .more-thumb{
+                            height:@thumb-height;
+                            margin-left:@thumb-width+3.5em;
+                            position:relative;
+                            border:1px solid #CCD0D7;
+                            border-radius:3px;
+                            padding:15px;
+                            box-sizing:border-box;
+
+                            .thumb-list-tips{
+                                margin:0 0 0 1.5em;
+                                line-height:1em;
+                                color:#99a2aa;
+                                font-size:.7em;
+                            }
+
+                            @san-size:15px;
+                            .arrow-left{
+                                display:block;
+                                position:absolute;
+                                left:-1px;
+                                top:50%;
+                                margin:-@san-size/2 0 0 -@san-size/2;
+                                width:@san-size;
+                                height:@san-size;
+                                border:1px solid #CCD0D7;
+                                border-top:0;
+                                border-right:0;
+                                background-color:#fff;
+                                transform:rotate(45deg);
+                            }
+
+                            .list{
+                                width:100%;
+                                height:calc(100% - .7em);
+                                margin:0;
+                                padding:0;
+                                overflow:hidden;
+                                white-space:nowrap;
+
+                                @list-item-margin:15px;
+                                .list-item{
+                                    display:inline-block;
+                                    list-style:none;
+                                    width:calc(100% / 5 - @list-item-margin);
+                                    height:100%;
+                                    margin-right:@list-item-margin;
+                                    position:relative;
+                                    border-radius:5px;
+                                    overflow:hidden;
+                                    cursor:pointer;
+
+                                    img{
+                                        display:block;
+                                        max-width:100%;
+                                        max-height:100%;
+                                        position:absolute;
+                                        top:0;
+                                        left:0;
+                                        right:0;
+                                        bottom:0;
+                                        margin:auto;
+                                    }
+
+                                }
+
+                                .list-item.default-thumb{
+                                    background-color:#F4F5F7;
+                                    cursor:default;
+                                }
+                            }
+
+                            &:after{
+                                .arrow-left;
+                                content:'';
+                            }
+                        }
+                    }
 
 
                 }
