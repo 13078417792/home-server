@@ -219,7 +219,7 @@ class Video extends Base{
 
 
         $result = model('UserVideo')->updateInfo($data);
-        return $result===true?json2(true,'修改成功',['data'=>$data,'share'=>$data['share']]):json2(false,'修改失败',['error'=>$result]);
+        return $result===true?json2(true,'操作成功',['data'=>$data,'share'=>$data['share']]):json2(false,'操作失败',['error'=>$result]);
     }
 
     // 添加视频分类
