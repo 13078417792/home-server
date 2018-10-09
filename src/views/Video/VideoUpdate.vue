@@ -10,7 +10,7 @@
                 <div class="thumb-part">
                     <div class="thumb" >
                         <input type="file" id="file" @change="uploadThumb">
-                        <img :src="form.thumb || info.screenshoots[0]" alt="" v-if="!$empty(info.screenshoots)">
+                        <img :src="form.thumb || info.screenshoots[0]" alt="" v-if="form.thumb || !$empty(info.screenshoots)">
                         <span>上传封面</span>
                     </div>
 
