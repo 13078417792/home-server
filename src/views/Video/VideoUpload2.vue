@@ -217,7 +217,11 @@
             }
         },
         methods:{
-            selectThumb(){},
+            selectThumb({target,srcElement}){
+                const el = target || srcElement
+                // console.log(el)
+                this.form.thumb = el.src
+            },
             async uploadThumb({target,srcElement}){
                 const el = target || srcElement
                 let file = el.files
@@ -251,10 +255,6 @@
                 }
             },
             async submit(){
-                if(!this.form.id){
-                    this.$tips('等待上传完毕后再提交视频信息','info')
-                    return
-                }
                 const {data} = await this.$http.post('/back/video/updateInfo',this.form)
                 if(data.success){
                     this.$success(data.msg || '操作成功')
@@ -366,6 +366,7 @@
                         }
                         this.uploadStatus = 'finished'
                         this.getScreenShoots()
+                        this.form.id = parseInt(data.id)
                         this.$success('秒传完成')
                         return ;
                     }
@@ -410,6 +411,9 @@
                         }
                         this.nextChunkProcess()
                         this.eachUpload(fileList,start+1)
+                        if(data.id){
+                            this.form.id = parseInt(data.id)
+                        }
                     })
                 }else{
                     this.uploadStatus = 'finished'
@@ -430,7 +434,7 @@
                 upload.append('index',index)
                 upload.append('end',data.length-1)
                 return new Promise(function(resolve,reject){
-                    self.$http.post('/back/video/upload3',upload).then(function({data}){
+                    self.$http.post('/back/video/upload4',upload).then(function({data}){
                         if(data.success){
                             resolve(data)
                         }else{
