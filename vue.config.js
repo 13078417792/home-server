@@ -3,7 +3,8 @@ module.exports = {
     configureWebpack:{
         devServer:{
             disableHostCheck: true,
-            proxy: 'http://192.168.51.181:8998/'
+            // proxy: 'http://192.168.51.181:8998/'
+            proxy:'http://api.server.php/'
         },
     },
     chainWebpack:config=>{
