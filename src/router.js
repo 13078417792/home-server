@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import VueCookie from 'vue-cookie'
 import axios from './util/axios'
+import mine from './util/mine'
+
 Vue.use(Router)
 
 const config = {
@@ -112,6 +114,7 @@ const R = new Router({
     base: process.env.BASE_URL,
     routes: routes,
     name_list:name_list,
+    config:config
     // path_list:path_list
 });
 const checkAuth = async function(to,from,next){
@@ -157,4 +160,12 @@ R.beforeEach(async (to,from,next)=>{
     next();
 
 });
+
+R.afterEach(to=>{
+    if(!config.not_layout.includes(to.name)){
+        mine.ws.connect().then(()=>{
+            console.log('websocket 连接成功')
+        })
+    }
+})
 export default R;
