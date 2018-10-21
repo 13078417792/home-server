@@ -30,27 +30,6 @@
             }
         },
         created(){
-            // document.addEventListener('drop',function(e){
-            //     e.preventDefault()
-            // })
-            // document.addEventListener('dropend',function(e){
-            //     e.preventDefault()
-            // })
-            // document.addEventListener('dropenter',function(e){
-            //     e.preventDefault()
-            // })
-            // document.addEventListener('dropexit',function(e){
-            //     e.preventDefault()
-            // })
-            // document.addEventListener('dropleave',function(e){
-            //     e.preventDefault()
-            // })
-            // document.addEventListener('dropover',function(e){
-            //     e.preventDefault()
-            // })
-            // document.addEventListener('dropstart',function(e){
-            //     e.preventDefault()
-            // })
 
         }
     }
