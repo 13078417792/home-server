@@ -230,7 +230,7 @@
             line-height:@header-height - (.8em * 2);
             background-color:#2F4056;
             position:relative;
-            z-index:15;
+            z-index:5;
             padding:.8em 1em;
             box-sizing:border-box;
             color:#fff;
