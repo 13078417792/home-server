@@ -169,11 +169,11 @@
         @title-font-size:.9em;
         .layer-dialog--title{
             width:100%;
-            height:@title-height / .9;
-            line-height:@title-height / .9;
+            height:@title-height / @title-font-size;
+            line-height:@title-height / @title-font-size;
             font-size:@title-font-size;
             color:#333;
-            padding:0 @padding*2/.9 0 @padding/.9;
+            padding:0 @padding*2/@title-font-size 0 @padding/@title-font-size;
             box-sizing:border-box;
             background-color:#F8F8F8;
             border-bottom:#eee;
