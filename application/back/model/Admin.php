@@ -48,7 +48,7 @@ class Admin extends \think\Model
                 'login_ip'=>$_SERVER['REMOTE_ADDR'],
                 'login_time'=>$_SERVER['REQUEST_TIME']
             ],$detail));
-            $auth_token = password_hash($auth_data,PASSWORD_DEFAULT);
+            $auth_token = substr(md5(password_hash($auth_data,PASSWORD_DEFAULT)),8,16);
             Cache::tag('auth')->set($auth_token,$auth_data,self::$auth_expires);
             return json2(true,'登陆成功',['auth_token'=>$auth_token,'expires'=>self::$auth_expires]);
         }else{
