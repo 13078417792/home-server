@@ -43,12 +43,12 @@ class Admin extends \think\Model
             $detail = toArray(self::get(function($query) use($data){
                 $query->where(['username'=>$data['username']])->field('pwd',true);
             }));
-            $auth_data = array_merge([
+            $auth_data = json_encode(array_merge([
                 'uniqid'=>uniqid(),
                 'login_ip'=>$_SERVER['REMOTE_ADDR'],
                 'login_time'=>$_SERVER['REQUEST_TIME']
-            ],$detail);
-            $auth_token = password_hash(serialize($auth_data),PASSWORD_DEFAULT);
+            ],$detail));
+            $auth_token = password_hash($auth_data,PASSWORD_DEFAULT);
             Cache::tag('auth')->set($auth_token,$auth_data,self::$auth_expires);
             return json2(true,'登陆成功',['auth_token'=>$auth_token,'expires'=>self::$auth_expires]);
         }else{
