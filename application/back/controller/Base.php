@@ -30,6 +30,9 @@ class Base extends \think\Controller{
         $auth = request()->header('authorization');
         $this->auth = $auth?:'';
         $auth_detail = $auth?Cache::tag('auth')->get($auth):[];
+        if(!empty($auth_detail)){
+            $auth_detail = json_decode($auth_detail,true);
+        }
         $path = '/'.strtolower(request()->module()).'/'.strtolower(request()->controller()).'/'.strtolower(request()->action());
 
         if(config('rbac.isValidate') && !Rbac::validateAccess(empty($auth_detail)?0:$auth_detail['id'],$path)){
@@ -83,7 +86,7 @@ class Base extends \think\Controller{
         if(!$token){
             return false;
         }
-        $cache = Cache::tag('auth')->get($token);
+        $cache = json_decode(Cache::tag('auth')->get($token,'{}'),true);
         if(empty($cache)){
             return [];
         }
