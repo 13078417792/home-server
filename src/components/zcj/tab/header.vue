@@ -48,6 +48,7 @@
     }
 
     .tab-header.on{
+        color:#5FB878;
 
         @border:3px;
         &:after{
