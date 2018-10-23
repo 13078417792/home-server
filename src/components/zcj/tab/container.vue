@@ -41,7 +41,6 @@
                 })
             })
             this.$set(this.headerStyle,'width',`${100 / this.items.length}%`)
-            console.log(this.items)
         },
         methods:{
             isIcon(str){
