@@ -1,9 +1,23 @@
 import axios from './axios'
 import {Message} from 'element-ui'
 import SparkMD5 from 'spark-md5'
+import wsClient from './ws'
+var ws = new wsClient('ws://127.0.0.1:8903')
+// ws.connect().then(e=>{
+//     console.log('websocket 连接成功')
+// })
 export default{
     http:axios,
+    ws:ws,
+    promise:function(fn){
+        return new Promise((resolve,reject)=>{
+            fn(resolve,reject)
+        })
+    },
     empty:function(val){
+        if(typeof val==='boolean'){
+            return false
+        }
         if(Array.isArray(val)){
             return !val.length;
         }
