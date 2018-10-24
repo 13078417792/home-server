@@ -253,13 +253,16 @@
             // 关闭弹窗并触发自定义事件
             close(){
                 const self = this
-
+                if(!this.$refs.dialog || !(this.$refs.dialog instanceof Element)){
+                    return
+                }
                 // 监听过渡结束事件
                 function transitionend(){
                     self.show = false // 删除节点
                     self.$refs.dialog.removeEventListener('transitionend',transitionend) // 解除事件监听
                     self.$emit('close') // 触发外部关闭事件
                 }
+                console.log(this.$refs.dialog)
                 this.$refs.dialog.addEventListener('transitionend',transitionend)
                 const classIndex = this.dialogClass.indexOf('layer-animate--open')
                 if(classIndex!==-1){
