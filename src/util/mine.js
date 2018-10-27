@@ -163,4 +163,31 @@ export default{
             }
         })
     },
+
+    stringSlice(data,size){
+        return new Promise((resolve,reject)=>{
+            if(isEmpty(data) || toString.call(data)!=='[object String]'){
+                return null
+            }
+            if(isEmpty(data) || data==0){
+                return null
+            }
+            let blob = new Blob([data])
+            if(blob.size>size){
+                let reader = new FileReader()
+                reader.onload = ()=>{
+                    resolve(reader.result)
+                }
+
+                reader.onerror = ()=>{
+                    reject(reader.error)
+                }
+
+                reader.readAsText(blob.slice(size))
+            }else{
+                resolve(data)
+            }
+        })
+
+    }
 }
