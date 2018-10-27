@@ -11,16 +11,15 @@ const state = {
     message:Object.create(null), // 聊天记录
     /*
     *   {
-    *       [userID]:{
-    *           [senderUID]:[
-    *               {
+    *       [userID]:[
+    *           {
     *                   type:send（发送的消息）|accept（接收的消息）  [接收还是发送]
     *                   time:timestamp,  [发送或接收消息的时间戳]
     *                   content:string|url, [发送、接收的内容]
     *                   contentType:image（图片）|text（文本）|file（文件） [内容类型]
-    *               }
-    *           ]
-    *       }
+    *           }
+    *       ]
+    *
     *   }
     *
     **/
