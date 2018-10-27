@@ -1,6 +1,7 @@
 import layerDialog from './layer/dialog'
 import tabContainer from './tab/container'
 import tabContent from './tab/content'
+import store from "../../store"
 require('./style/common.less')
 require('./style/layui-icon/layui-icon.css')
 
@@ -100,14 +101,13 @@ export default {
             container.css('background-color',null)
         }
 
-
-
         // dialog相关
         Vue.mixin({
             created(){
                 if(!this.hasOwnProperty('dialog') || !Array.isArray(this.dialog) || !this.dialog.length){
                     return
                 }
+
                 let container
                 if(!document.body.querySelector(selector)){
                     container = document.createElement('div')
@@ -116,6 +116,7 @@ export default {
                 }else{
                     container = document.body.querySelector(selector)
                 }
+
                 Vue.prototype.dialogContainer = container
                 this.dialogInstance = {}
 
@@ -125,6 +126,7 @@ export default {
                     container.appendChild(subContainer)
                     const dialogInstance = new dialog({
                         el:subContainer,
+                        store,
                         data(){
                             return {
                                 title:el.name || null,
