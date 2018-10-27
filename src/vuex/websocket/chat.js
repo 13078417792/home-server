@@ -58,7 +58,7 @@ const mutations = {
     },
     addNotReadPrivateMessage(state,uid){
         if(mine.empty(state.notReadPrivateMessageCount[uid])){
-            console.log('empty',state.notReadPrivateMessageCount[uid],uid)
+            // console.log('empty',state.notReadPrivateMessageCount[uid],uid)
             return
         }
         state.notReadPrivateMessageCount[uid] += 1
@@ -145,7 +145,7 @@ const getters = {
 
     // 获取聊天信息
     privateMessage(state){
-        if(!state.chatUserID || !Object.hasOwnProperty.call(state.message,state.chatUserID)){
+            if(!state.chatUserID || !Object.hasOwnProperty.call(state.message,state.chatUserID)){
             console.warn('没有指定用户的聊天信息')
             console.log(state.chatUserID)
             return []
