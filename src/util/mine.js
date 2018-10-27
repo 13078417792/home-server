@@ -3,9 +3,26 @@ import {Message} from 'element-ui'
 import SparkMD5 from 'spark-md5'
 import wsClient from './ws'
 var ws = new wsClient('ws://127.0.0.1:8903')
-// ws.connect().then(e=>{
-//     console.log('websocket 连接成功')
-// })
+
+const isEmpty = val=>{
+    if(typeof val==='boolean'){
+        return false
+    }
+    if(Array.isArray(val)){
+        return !val.length
+    }
+    if(toString.call(val) === '[object Object]'){
+        for(let i in val){
+            return false
+        }
+        return true
+    }
+    if([null,undefined,'',NaN].includes(val)){
+        return true
+    }
+    return false
+}
+
 export default{
     http:axios,
     ws:ws,
@@ -14,24 +31,8 @@ export default{
             fn(resolve,reject)
         })
     },
-    empty:function(val){
-        if(typeof val==='boolean'){
-            return false
-        }
-        if(Array.isArray(val)){
-            return !val.length;
-        }
-        if(typeof val === 'object'){
-            for(let i in val){
-                return false;
-            }
-            return true;
-        }
-        if(val!==0 && val!=null && val!==undefined){
-            return false;
-        }
-        return true;
-    },
+    empty:isEmpty,
+    isEmpty:isEmpty,
     fmtDate:function(obj){
         const date =  new Date(obj*1000);
         const y = date.getFullYear();
