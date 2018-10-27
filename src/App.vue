@@ -13,24 +13,48 @@
 
 <script>
     import Vue from 'vue'
+    import chat from '@/dialog/chat'
     export default{
         name:'App',
         data(){
             return {
-                layout:null
+                layout:null,
+                dialog:[chat]
             };
         },
         watch:{
             '$route':function(newVal){
                 if(newVal.meta && newVal.meta.layout){
                     this.layout = Vue.component(newVal.meta.layout,()=>import(`./layouts/${newVal.meta.layout}`)); // 异步注册组件
+                    this.chat()
                 }else{
-                    this.layout = null;
+                    this.layout = null
+                    if(this.dialogInstance.hasOwnProperty('chat')){
+                        this.dialogInstance.chat.close()
+                    }
                 }
             }
         },
         created(){
-
+            // console.log(this.dialogInstance)
+            this.getOnlineUser()
+        },
+        methods:{
+            chat(){
+                this.dialogInstance.chat.open({
+                    title:'站内通信',
+                    width:'414px',
+                    height:'736px',
+                    fixed:3
+                })
+            },
+            getOnlineUser(){
+                // 实时更新在线用户
+                this.$ws.addBroadCase('onlineUserList',result=>{
+                    // console.log(result)
+                    this.$store.commit('chat/updateOnlineUser',result.data)
+                })
+            },
         }
     }
 </script>
