@@ -10,11 +10,14 @@ import VueCookie from 'vue-cookie'
 import methods from '@/util/methods'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+
+import components from './components/zcj/components'
+Vue.use(components)
 Vue.use(ElementUI)
 Vue.use(VueCookie)
 Vue.use(methods)
 Vue.config.productionTip = false
-
+Vue.prototype._zcjComponent.zIndex = 4000
 new Vue({
   router,
   store,
