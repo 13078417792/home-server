@@ -73,15 +73,36 @@
                 if(this.$isEmpty(this.content)){
                     return
                 }
-                this.$ws.send('chat/private_message',{content:this.content,type:'text',uid:this.chatUserID})
-                this.$store.commit('chat/addMessage',{
-                    charUserID:this.chatUserID,
-                    message:this.content,
-                    messageType:'text',
-                    type:'send'
-                })
-                this.content = null
-                this.$refs.talk.innerHTML = null
+
+                const maxSize = 1024
+
+                const send = msg =>{
+                    this.$ws.send('chat/private_message',{content:msg,type:'text',uid:this.chatUserID})
+                    this.$store.commit('chat/addMessage',{
+                        charUserID:this.chatUserID,
+                        message:msg,
+                        messageType:'text',
+                        type:'send'
+                    })
+                    this.content = null
+                    this.$refs.talk.innerHTML = null
+                }
+
+                let content = this.content
+
+                let blob = new Blob([content])
+                if(blob.size>maxSize){
+                    let reader = new FileReader(blob)
+                    reader.onload = ()=>{
+                        content = reader.result
+                        send(content)
+                    }
+                    reader.readAsText(blob.slice(0,maxSize))
+                }else{
+                    send(content)
+                }
+
+
             }
         }
     }
