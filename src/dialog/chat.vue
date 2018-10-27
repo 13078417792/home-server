@@ -52,16 +52,30 @@
             // 接收私聊信息
             acceptPrivateMessage(){
                 this.$ws.addBroadCase('private_message',result=>{
-                    if(result.data.senderUID!==this.chatUserID){
-                        this.$store.commit('chat/addNotReadPrivateMessage',result.data.senderUID)
-                    }
+
                     console.log(result)
-                    this.$store.commit('chat/addMessage',{
-                        charUserID:result.data.senderUID,
-                        message:result.data.message,
-                        messageType:'text',
-                        type:'accept'
-                    })
+                    if(result.data.senderUID===this.currentUID){
+                        // 同步其他登录相同账号的聊天记录(发送者ID和当前用户ID相同)
+                        this.$store.commit('chat/addMessage',{
+                            charUserID:result.data.acceptUID, // 接收消息的目标用户ID
+                            message:result.data.message,
+                            messageType:'text',
+                            type:'send'
+                        })
+                    }else{
+                        if(result.data.senderUID!==this.chatUserID){
+                            // 增加未读消息数量(发送者ID和当前聊天目标用户ID不相同)
+                            this.$store.commit('chat/addNotReadPrivateMessage',result.data.senderUID)
+                        }
+                        this.$store.commit('chat/addMessage',{
+                            charUserID:result.data.senderUID, // 发送者ID
+                            message:result.data.message,
+                            messageType:'text',
+                            type:'accept'
+                        })
+                    }
+
+                    console.log(result.data.senderUID,this.currentUID)
                 })
 
             },
