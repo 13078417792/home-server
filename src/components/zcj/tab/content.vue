@@ -20,6 +20,10 @@
                 type:String,
                 required:false,
                 default:''
+            },
+            count:{
+                type:Number,
+                default:0
             }
         }
     }
