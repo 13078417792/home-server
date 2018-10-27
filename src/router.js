@@ -163,9 +163,16 @@ R.beforeEach(async (to,from,next)=>{
 
 R.afterEach(to=>{
     if(!config.not_layout.includes(to.name)){
+        mine.ws.auth = VueCookie.get('auth_token') || null
+        if(!mine.ws.auth){
+            return
+        }
         mine.ws.connect().then(()=>{
             console.log('websocket 连接成功')
         })
+    }else{
+        mine.ws.auth = null
+        mine.ws.client.close()
     }
 })
 export default R;
