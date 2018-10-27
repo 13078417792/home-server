@@ -1,5 +1,6 @@
 import mine from '../util/mine'
 let state = {
+    currentUserDetail:{},
     userListDetail:{}, // 对应用户的详细信息（包含权限信息） key为用户ID
     role:[],
     roleListDetail:{},
@@ -97,6 +98,12 @@ let actions = {
 }
 
 let mutations = {
+    setCurrentUserDetail(state,detail){
+        if(mine.empty(detail) || toString.call(detail)!=='[object Object]'){
+            return
+        }
+        state.currentUserDetail = Object.assign({},detail)
+    },
     userDetail(state,data){
         if(!mine.empty(data) && typeof data==='object'){
             state.userListDetail[data.uid] = data
@@ -165,6 +172,12 @@ let getters = {
     accessDetail(state){
         return state.accessDetail
     },
+    currentUserDetail(state){
+        return state.currentUserDetail
+    },
+    currentUID(state){
+        return state.currentUserDetail.id
+    }
 }
 
 export default {
