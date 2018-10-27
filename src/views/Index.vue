@@ -1,25 +1,30 @@
 <template>
     <div class="index">
-        hahahha
+
     </div>
 </template>
 
 <script>
-    import framework from '@/layouts/framework'
     export default {
         name: "Index",
-        // components:{framework},
-        created(){
-
-        },
         data(){
             return {
+                msg:''
+            }
+        },
+        created(){
+            window.ws = this.$ws
+        },
+        methods:{
 
-            };
         }
     }
 </script>
 
 <style scoped lang="less">
-
+    .index{
+        height:100%;
+        overflow-y:auto;
+        overflow-x:hidden;
+    }
 </style>
