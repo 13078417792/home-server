@@ -1,3 +1,20 @@
+@font-face {
+  font-family: 'iconfont';  /* project id 884612 */
+  src: url('//at.alicdn.com/t/font_884612_rdedeiofsce.eot');
+  src: url('//at.alicdn.com/t/font_884612_rdedeiofsce.eot?#iefix') format('embedded-opentype'),
+  url('//at.alicdn.com/t/font_884612_rdedeiofsce.woff') format('woff'),
+  url('//at.alicdn.com/t/font_884612_rdedeiofsce.ttf') format('truetype'),
+  url('//at.alicdn.com/t/font_884612_rdedeiofsce.svg#iconfont') format('svg');
+}
+
+.iconfont-zcj{
+  font-family:"iconfont" !important;
+  font-size:16px;font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke-width: 0.2px;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .overflow-line{
   overflow:hidden;
   text-overflow:ellipsis;
@@ -14,4 +31,15 @@
 
 .layer-animate--open{
   opacity:1;
+}
+
+.dialog-container.dialog-container---shade{
+  width:100%;
+  height:100%;
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:1000;
+  background-color:rgba(0,0,0,.5);
+  transition:background-color .3s;
 }
