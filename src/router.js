@@ -172,7 +172,10 @@ R.afterEach(to=>{
         })
     }else{
         mine.ws.auth = null
-        mine.ws.client.close()
+        try{
+            mine.ws.client.close()
+        }catch(e){}
+
     }
 })
 export default R;
