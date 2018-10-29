@@ -119,6 +119,7 @@
                     border:1px solid #7aa9d8;
                     transition:all .3s;
                     color:#fff;
+                    box-sizing:content-box;
 
                     &:hover,&:focus{
                         border-color:#aec2d6;
