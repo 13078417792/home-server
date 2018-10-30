@@ -99,7 +99,7 @@ class Admin extends \think\Model
             ->group('a.id')
             ->field('a.id as uid,a.username,a.add_time,a.update_time,a.nickname,a.status,GROUP_CONCAT(r.name) as role_name,FROM_UNIXTIME(a.add_time) as add_time_fmt')
             ->order('a.id asc,r.id asc')
-            ->where('a.status<>2')
+            ->where('a.status=1')
             ->where($where)
             ->paginate($size,false,['page'=>$page]);
 //            ->paginate(10);
