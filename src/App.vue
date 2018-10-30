@@ -38,6 +38,7 @@
         created(){
             // console.log(this.dialogInstance)
             this.getOnlineUser()
+            this.$store.dispatch('system/getUser') // 获取用户列表
         },
         methods:{
             chat(){
