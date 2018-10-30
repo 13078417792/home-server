@@ -2,6 +2,7 @@ import mine from '../util/mine'
 let state = {
     currentUserDetail:{},
     userListDetail:{}, // 对应用户的详细信息（包含权限信息） key为用户ID
+    user:[],
     role:[],
     roleListDetail:{},
     access:{},
@@ -95,9 +96,17 @@ let actions = {
             }
         })
     },
+
+    async getUser({commit}){
+        const {data} = await mine.http.post('/back/auth/getUserList')
+        commit('updateUser',data.list)
+    }
 }
 
 let mutations = {
+    updateUser(state,data){
+        state.user = data
+    },
     setCurrentUserDetail(state,detail){
         if(mine.empty(detail) || toString.call(detail)!=='[object Object]'){
             return
