@@ -59,6 +59,28 @@ class Rbac
 
     // 验证权限
     static public function validateAccess($id,$path){
+        if(array_key_exists('isWhite',$GLOBALS) && $GLOBALS['isWhite']!==null && gettype($GLOBALS['isWhite'])==='boolean'){
+            $ok = $GLOBALS['isWhite'];
+        }else{
+            $ok = self::isWhite($path);
+        }
+        if($ok){
+            return true;
+        }
+        if(!$id){
+            return false;
+        }
+        $res = self::getAdminDetail($id);
+        if(config('rbac.SUPER_USERNAME')===$res['username']){
+            return true;
+        }elseif(in_array(config('rbac.SUPER_ROLE'),$res['role'])){
+            return true;
+        }
+        return in_array($path,$res['access']);
+    }
+
+    static public function isWhite($path){
+        $GLOBALS['isWhite'] = null;
         $white = config('rbac.WHITELIST_PATH');
         $path = preg_replace('/^\//','',$path);
         $path_arr = explode('/',$path);
@@ -78,19 +100,8 @@ class Rbac
         }else{
             $ok = false;
         }
-        if($ok){
-            return true;
-        }
-        if(!$id){
-            return false;
-        }
-        $res = self::getAdminDetail($id);
-        if(config('rbac.SUPER_USERNAME')===$res['username']){
-            return true;
-        }elseif(in_array(config('rbac.SUPER_ROLE'),$res['role'])){
-            return true;
-        }
-        return in_array($path,$res['access']);
+        $GLOBALS['isWhite'] = $ok;
+        return $ok;
     }
 
     // 是否超管
