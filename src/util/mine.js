@@ -2,7 +2,7 @@ import axios from './axios'
 import {Message} from 'element-ui'
 import SparkMD5 from 'spark-md5'
 import wsClient from './ws'
-var ws = new wsClient('ws://127.0.0.1:8903')
+var ws = new wsClient('ws://192.168.51.231:8903')
 
 const isEmpty = val=>{
     if(typeof val==='boolean'){
@@ -21,6 +21,40 @@ const isEmpty = val=>{
         return true
     }
     return false
+}
+
+const readImageBase64 = file=>{
+    return new Promise((resolve, reject)=>{
+        if(!file || !file instanceof File){
+            reject('不是文件')
+        }
+
+        let reader = new FileReader()
+        reader.onload = function(){
+            resolve(reader.result)
+        }
+
+        reader.onerror = function(){
+            reject(reader.error)
+        }
+
+        reader.readAsDataURL(file)
+    })
+}
+
+File.prototype.toBase64 = function(){
+    return new Promise((resolve, reject)=>{
+        let reader = new FileReader()
+        reader.onload = function(){
+            resolve(reader.result)
+        }
+
+        reader.onerror = function(){
+            reject(reader.error)
+        }
+
+        reader.readAsDataURL(this)
+    })
 }
 
 export default{
@@ -189,5 +223,24 @@ export default{
             }
         })
 
+    },
+
+    readImageBase64(file){
+        return new Promise((resolve, reject)=>{
+            if(!file || !file instanceof File){
+                reject('不是文件')
+            }
+
+            let reader = new FileReader()
+            reader.onload = function(){
+                resolve(reader.result)
+            }
+
+            reader.onerror = function(){
+                reject(reader.error)
+            }
+
+            reader.readAsDataURL(file)
+        })
     }
 }
