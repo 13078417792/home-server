@@ -98,7 +98,9 @@ let actions = {
     },
 
     async getUser({commit}){
-        const {data} = await mine.http.post('/back/auth/getUserList')
+        const {data} = await mine.http.get('/back/auth/getUserList',{params:{
+                size:10000
+            }})
         commit('updateUser',data.list)
     }
 }
