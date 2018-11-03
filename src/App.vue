@@ -38,6 +38,7 @@
         created(){
             // console.log(this.dialogInstance)
             this.getOnlineUser()
+            this.getGroupList()
             this.$store.dispatch('system/getUser') // 获取用户列表
         },
         methods:{
@@ -56,6 +57,15 @@
                     this.$store.commit('chat/updateOnlineUser',result.data)
                 })
             },
+            getGroupList(){
+                // 实时更新群组列表
+                this.$ws.addBroadCase('groupList',result=>{
+                    // console.log(result)
+                    console.log(result)
+                    this.$store.commit('chat/addSingleGroup',result.data)
+                    // this.$store.commit('chat/updateOnlineUser',result.data)
+                })
+            }
         }
     }
 </script>
