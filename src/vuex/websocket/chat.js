@@ -23,6 +23,9 @@ const state = {
     *   }
     *
     **/
+
+
+    group:[], // 群组列表
 }
 
 const mutations = {
@@ -121,11 +124,37 @@ const mutations = {
             contentType:options.messageType,
             type:options.type
         })
+    },
+    updateGroup(state,data){
+        if(mine.isEmpty(data) || !Array.isArray(data)){
+            return
+        }
+        else{
+            state.group = data
+        }
+    },
+
+    // 添加一个群组信息
+    addSingleGroup(state,data){
+        if(mine.isEmpty(data) || toString.call(data)!=='[object Object]'){
+            return
+        }
+        state.group.push(data)
     }
 }
 
 const actions = {
 
+    async getGroup({commit}){
+        const auth = Vue.cookie.get('auth_token') || null
+        if(mine.isEmpty(auth)){
+            return Promise.reject('用户令牌失效')
+        }
+        const {data} = await mine.http.post('/back/chat/getGroup')
+        if(data.success){
+            commit('updateGroup',data.groupList)
+        }
+    }
 }
 
 const getters = {
