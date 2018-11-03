@@ -1,11 +1,12 @@
 import layerDialog from './layer/dialog'
 import tabContainer from './tab/container'
 import tabContent from './tab/content'
+import avatar from './avatar'
 import store from "../../store"
 require('./style/common.less')
 require('./style/layui-icon/layui-icon.css')
 
-const components = [layerDialog,tabContainer,tabContent]
+const components = [layerDialog,tabContainer,tabContent,avatar]
 
 function empty(data){
     if([undefined,null,"",''].includes(data)){
@@ -29,9 +30,15 @@ export default {
     install(Vue) {
 
         let dialogIndex = 1
+        const index = 3000
 
         Vue.prototype._zcjComponent = {
-            zIndex:3000,
+            // zIndex:index,
+            dialog:{
+                cssIndex:4000,
+                count:0,
+                maxZIndex:4000
+            },
             list:[]
         }
 
@@ -121,6 +128,7 @@ export default {
                 this.dialogInstance = {}
 
                 this.dialog.forEach(el=>{
+                    const cssIndex = Vue.prototype._zcjComponent.dialog.cssIndex + Vue.prototype._zcjComponent.dialog.count + 1
                     const dialog = Vue.extend(layerDialog)
                     const subContainer = document.createElement('div')
                     container.appendChild(subContainer)
@@ -130,7 +138,8 @@ export default {
                         data(){
                             return {
                                 title:el.name || null,
-                                components:{el}
+                                components:{el},
+                                cssIndex:cssIndex
                             }
                         }
                     })
@@ -146,6 +155,8 @@ export default {
                     }else{
                         this.dialogInstance[el.name] = dialogInstance
                     }
+                    Vue.prototype._zcjComponent.dialog.count += 1
+                    Vue.prototype._zcjComponent.dialog.maxZIndex = cssIndex
 
                 })
             }
