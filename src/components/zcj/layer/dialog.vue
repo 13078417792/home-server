@@ -1,5 +1,5 @@
 <template>
-    <dialog v-if="show" class="layer-dialog" :class="dialogClass" ref="dialog" :style="dialogStyle" @mousedown.stop >
+    <dialog v-if="show" class="layer-dialog" :class="dialogClass" ref="dialog" :style="dialogStyle" @mousedown.stop="addZIndex" >
         <div class="layer-dialog--title overflow-line" @mousedown.stop="mousedown" draggable="false" :style="titleStyle">
             {{title}}
             <i class="icon layui-icon" @click.stop="close">&#x1006;</i>
@@ -95,6 +95,10 @@
             }
         },
         methods:{
+            addZIndex(){
+                this.dialogStyle.zIndex = this._zcjComponent.dialog.maxZIndex + 1
+                this._zcjComponent.dialog.maxZIndex++
+            },
             backupData(){
                 const field = ['width','height','drag']
                 field.forEach(el=>{
@@ -183,7 +187,8 @@
             },
 
             computedDialogStyle(){
-                this.$set(this.dialogStyle,'zIndex',this._zcjComponent.zIndex)
+                // this.$set(this.dialogStyle,'zIndex',this._zcjComponent.zIndex)
+                this.$set(this.dialogStyle,'zIndex',this.cssIndex)
                 this.$set(this.dialogStyle,'width',this.width)
                 this.$set(this.dialogStyle,'height',this.height)
             },
@@ -200,6 +205,7 @@
 
             // 标题元素事件 Start
             mousedown(e){
+                this.addZIndex()
                 if(!this.drag){
                     return
                 }
@@ -262,7 +268,6 @@
                     self.$refs.dialog.removeEventListener('transitionend',transitionend) // 解除事件监听
                     self.$emit('close') // 触发外部关闭事件
                 }
-                console.log(this.$refs.dialog)
                 this.$refs.dialog.addEventListener('transitionend',transitionend)
                 const classIndex = this.dialogClass.indexOf('layer-animate--open')
                 if(classIndex!==-1){
@@ -305,9 +310,8 @@
                     setTimeout(()=>{
                         this.dialogClass.push('layer-animate--open')
                         this.handleFixed()
-
+                        this.addZIndex()
                     },0)
-
                 }
 
             },
