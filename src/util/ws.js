@@ -135,11 +135,11 @@ class ws{
         if(this.empty(data)){
             this.error('没有发送数据')
         }
-        if(!options.isReturn){
+        if(!(options.hasOwnProperty('isReturn') && toString.call(options.isReturn)==='[object Boolean]')){
             options.isReturn = false
         }
         // options.auth = 123 // this.auth
-        options.auth = this.auth
+        // options.auth = this.auth
         let sendData = Object.create(null)
 
         sendData.path = path
@@ -196,12 +196,22 @@ class ws{
     }
 
     // 添加广播监听事件
-    addBroadCase(path,fn){
-        if(typeof path!=='string' || this.empty(path) || typeof fn!=='function'){
-            return
+    addBroadCase(name,fn){
+        if(typeof name!=='string' || this.empty(name) || typeof fn!=='function'){
+            return this
         }
-        this.broadcastEventList[path] = fn
+        this.broadcastEventList[name] = fn
+        return this
         // console.log(this.broadcastEventList)
+    }
+
+    // 移除广播监听
+    removeBroadCase(name){
+        if(this.empty(name) || typeof name !=='string' || !this.broadcastEventList.hasOwnProperty(name) || typeof this.broadcastEventList[name]!=='function'){
+            return this
+        }
+        delete this.broadcastEventList[name]
+        return this
     }
 
 }
