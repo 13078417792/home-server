@@ -29,7 +29,8 @@ return [
     // 扩展函数文件
     'extra_file_list'        => [THINK_PATH . 'helper' . EXT,APP_PATH.'helper'.EXT],
     // 默认输出类型
-    'default_return_type'    => 'html',
+    'default_return_type'    => 'json',
+//    'default_return_type'    => 'html',
     // 默认AJAX 数据返回格式,可选json xml ...
     'default_ajax_return'    => 'json',
     // 默认JSONP格式返回的处理方法
@@ -56,7 +57,7 @@ return [
     // 默认模块名
     'default_module'         => 'back',
     // 禁止访问模块
-    'deny_module_list'       => ['common'],
+    'deny_module_list'       => ['common','websocket'],
     // 默认控制器名
     'default_controller'     => 'index',
     // 默认操作名
@@ -151,7 +152,8 @@ return [
     // +----------------------------------------------------------------------
 
     // 异常页面的模板文件
-    'exception_tmpl'         => THINK_PATH . 'tpl' . DS . 'think_exception.tpl',
+//    'exception_tmpl'         => THINK_PATH . 'tpl' . DS . 'think_exception.tpl',
+    'exception_tmpl'         => $debug?THINK_PATH . 'tpl' . DS . 'think_exception.tpl':ROOT_PATH .DS. 'public' . DS . 'error.html',
 
     // 错误显示信息,非调试模式有效
     'error_message'          => '页面错误！请稍后再试～',
@@ -185,10 +187,22 @@ return [
     // | 缓存设置
     // +----------------------------------------------------------------------
 
+//    'cache'                  => [
+//        // 驱动方式
+//        //'type'   => 'File',
+//        'type'   => 'memcached',
+//        // 缓存保存目录
+//        'path'   => CACHE_PATH,
+//        // 缓存前缀
+//        'prefix' => '',
+//        // 缓存有效期 0表示永久缓存
+//        'expire' => 0,
+//    ],
     'cache'                  => [
         // 驱动方式
         //'type'   => 'File',
-        'type'   => 'memcached',
+        'type'   => 'redis',
+        'host'=>'127.0.0.1',
         // 缓存保存目录
         'path'   => CACHE_PATH,
         // 缓存前缀
@@ -239,4 +253,51 @@ return [
         'var_page'  => 'page',
         'list_rows' => 15,
     ],
+
+    'tool_db_config'=>[
+        // 数据库类型
+        'type'            => 'mysql',
+        // 服务器地址
+//    'hostname'        => '127.0.0.1',
+        'hostname'        => '192.168.1.5',
+        // 数据库名
+        'database'        => 'tool',
+        // 用户名
+        'username'        => 'vm',
+        // 密码
+        'password'        => 'root',
+        // 端口
+        'hostport'        => '',
+        // 连接dsn
+        'dsn'             => '',
+        // 数据库连接参数
+        'params'          => [],
+        // 数据库编码默认采用utf8
+        'charset'         => 'utf8',
+        // 数据库表前缀
+        'prefix'          => '',
+        // 数据库调试模式
+        'debug'           => true,
+        // 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)
+        'deploy'          => 0,
+        // 数据库读写是否分离 主从式有效
+        'rw_separate'     => false,
+        // 读写分离后 主服务器数量
+        'master_num'      => 1,
+        // 指定从服务器序号
+        'slave_no'        => '',
+        // 自动读取主库数据
+        'read_master'     => false,
+        // 是否严格检查字段是否存在
+        'fields_strict'   => true,
+        // 数据集返回类型
+        'resultset_type'  => 'array',
+        // 自动写入时间戳字段
+        'auto_timestamp'  => false,
+        // 时间字段取出后的默认时间格式
+        'datetime_format' => 'Y-m-d H:i:s',
+//    'datetime_format'=>false,
+        // 是否需要进行SQL性能分析
+        'sql_explain'     => false,
+    ]
 ];

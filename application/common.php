@@ -11,3 +11,8 @@
 
 // 应用公共文件
 mb_internal_encoding('UTF-8');
+
+define('CHN_PREG','\\\u4e00-\\\u9fa5');
+
+define('API_SUCCESS','操作成功');
+define('API_FAIL','操作失败');

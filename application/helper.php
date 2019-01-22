@@ -6,6 +6,20 @@
  * Time: 22:05
  */
 use \app\back\controller\Base as BackBaseController;
+use \GuzzleHttp\Client;
+
+// 网盘-文件最终保存文职
+if(!realpath(ROOT_PATH.'..'.DS.'..'.DS.'net-disk-save')){
+    mkdir(ROOT_PATH.'..'.DS.'..'.DS.'net-disk-save',0770);
+}
+define('DISK_SAVE_PATH',realpath(ROOT_PATH.'..'.DS.'..'.DS.'net-disk-save'));
+
+// 网盘-上传的数据块的临时保存位置
+if(!realpath(DISK_SAVE_PATH.DS.'temp')){
+    mkdir(DISK_SAVE_PATH.DS.'temp',0770);
+}
+define('DISK_TEMP_SAVE_PATH',realpath(DISK_SAVE_PATH.DS.'temp'));
+
 //use crypt;
 function dd($var)
 {
@@ -31,7 +45,7 @@ function dd($var)
     }
 }
 
-function json2($success,$msg='',$extend=[]){
+function json2($success,$msg='',$extend=[],array $log=[]){
     return BackBaseController::json($success,$msg,$extend);
 }
 
@@ -85,3 +99,21 @@ function replace($str,$preg=''){
     return $str;
 
 }
+
+function printJson(...$args){
+    BackBaseController::printJson(...$args);
+}
+
+/**
+ * 转换JSON
+ * @param string $json JSON字符串
+ * @param bool $inside 是否内部接口
+ * @return bool|mixed
+ */
+function convertJsonToArray(string $json,bool $inside=true){
+    $result = json_decode($json);
+    if(json_last_error()!==JSON_ERROR_NONE) return false;
+    if($inside && !array_key_exists('success',$result)) return false;
+    return $result;
+}
+
