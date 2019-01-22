@@ -30,7 +30,7 @@ function lower_path($path){
 }
 $WHITELIST_PATH = lower_path($WHITELIST_PATH);
 return [
-    'isValidate'=>false,
+    'isValidate'=>true,
     'SUPER_USERNAME'=>'admin',
     'SUPER_UID'=>1,
     'SUPER_ROLE_ID'=>1, // 超管角色ID
