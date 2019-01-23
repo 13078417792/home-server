@@ -3,8 +3,9 @@
 namespace app\tool\model;
 
 use think\Model;
+use app\tool\model\Account as AccountModel;
 
-class NetDiskFolder extends Model{
+class NetDiskFolder extends Base{
 
     static public function parseFolderName(string $name) :array{
         $match_arr = [];
@@ -84,6 +85,25 @@ class NetDiskFolder extends Model{
             return $value['pid']===0;
         });
         return  $data;
+    }
+
+    // 是否有子节点
+    static public function hasChildren($id){
+        $account = self::getAccount();
+        if($id instanceof self){
+            $detail = $id;
+        }else if(is_int($id) && $id>0){
+            $detail = $account->folder()->find($id);
+            unset($account);
+        }else{
+            return false;
+        }
+        $children_node = $account->folder()->where([
+            'parent_key'=>['like',"{$detail->parent_key}{$detail->id}-%"]
+        ])->column('id')?:[];
+
+        return $children_node;
+
     }
 
 
