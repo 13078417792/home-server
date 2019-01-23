@@ -53,36 +53,35 @@ class NetDiskFolder extends Base{
     }
 
     // 递归方式输出树形数据
-    static public function handleTree(array $data,int $pid=0) :array{
+    static public function handleTree(array $data,int $pid=0,$level=1) :array{
         $tree = [];
         foreach($data as $key => $value){
             if($value['pid']==$pid){
                 $temp = $value;
                 array_splice($data,$key,1);
-                $result = self::handleTree($data,$value['id']);
+                $result = self::handleTree($data,$value['id'],$level+1);
                 if(!empty($result)){
                     $temp['children'] = $result;
                 }
                 $tree[] = $temp;
             }
         }
-        if($pid===0){
-            $tree = array_filter($tree,function($value){
-                return $value['pid']===0;
-            });
-        }
+        $tree = array_filter($tree,function($value) use($pid){
+            return $value['pid']===$pid;
+        });
+
         return $tree;
     }
 
     // 引用方式输出树形数据
-    static public function handleTreeRef(array $data) {
+    static public function handleTreeRef(array $data,int $pid=0) {
         foreach($data as $key => &$value){
             if(!empty($data[$value['pid']])){
                 $data[$value['pid']]['children'][] = &$value;
             }
         }
-        $data = array_filter($data,function($value){
-            return $value['pid']===0;
+        $data = array_filter($data,function($value) use($pid){
+            return $value['pid']===$pid;
         });
         return  $data;
     }
