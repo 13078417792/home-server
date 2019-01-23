@@ -146,13 +146,6 @@ class DiskFolder extends Base
         return $this->actionFolder();
     }
 
-    // 删除文件夹
-    public function del()
-    {
-        $id = request()->post('id/d', 0);
-        if (!$id) return json2(false, '删除失败');
-    }
-
     // 移动文件夹
     // 问题：未判断是否相同文件夹名（代码已改，未多次测试）
     public function move()
@@ -160,7 +153,7 @@ class DiskFolder extends Base
         $account = $this->account;
         $id = request()->post('id/d', 0);
         $pid = request()->post('pid/d', 0);
-        if (!$id || $id < 0 || $pid < 0) return json2(false, API_FAIL);
+        if (!$id || $id < 0 || $pid < 0 || $pid==$id) return json2(false, API_FAIL);
 
         $result = $account->folder()->find($id);
         if (!(bool)$result) return json2(false, API_FAIL, ['error' => '文件夹不存在']);
@@ -188,7 +181,8 @@ class DiskFolder extends Base
             ]);
             if (empty($parent)) return json2(false, API_FAIL, ['error' => '目标文件夹不存在']);
 //            return $result;
-            if ($result->parent_key && strpos($parent->parent_key, "{$result->parent_key}{$result->id}-") === 0) return json2(false, API_FAIL, ['error' => '父子节点重复嵌套']);
+//            if ($result->parent_key && strpos($parent->parent_key, "{$result->parent_key}{$result->id}-") === 0) return json2(false, API_FAIL, ['error' => '父子节点重复嵌套']);
+            if (strpos($parent->parent_key, "{$result->parent_key}{$result->id}-") === 0) return json2(false, API_FAIL, ['error' => '父子节点重复嵌套']);
             $target_parent_key = "{$parent->parent_key}{$pid}-";
         } else {
             $target_parent_key = '';
@@ -217,12 +211,20 @@ class DiskFolder extends Base
 
         $rows = 0;
         foreach ($children_update as $key => $value) {
-            $update_model = NetDiskFolderModel::get($key);
+//            $update_model = NetDiskFolderModel::get($key);
+            $update_model = NetDiskFolderModel::get([
+                'id'=>$key,
+                'account_id'=>$this->uid
+            ]);
             $update_model->parent_key = $value;
             $rows += $update_model->save();
         }
 
-        $update_model = NetDiskFolderModel::get($id);
+//        $update_model = NetDiskFolderModel::get($id);
+        $update_model = NetDiskFolderModel::get([
+            'id'=>$id,
+            'account_id'=>$this->uid
+        ]);
         $update_model->pid = $pid;
 //        $update_model->name = $update_name;
         $update_model->parent_key = $target_parent_key;
@@ -239,61 +241,20 @@ class DiskFolder extends Base
         return json2(true, '', ['uid' => $this->uid, 'folder' => $folders]);
     }
 
-    public function test()
-    {
-//        $sql = "
-//            SELECT a.id,a.account_id,a.pid,
-//
-//                CASE WHEN a.index=0
-//                        THEN
-//                        a.main_name
-//                        ELSE
-//                        CONCAT(a.main_name,\"(\",a.index,\")\")
-//                END
-//                AS `name`
-//            FROM net_disk_folder AS a
-//            LEFT JOIN account as b ON a.account_id=b.uid
-//            WHERE a.account_id=:uid AND a.id=:id AND b.status=1
-//        ";
-//        $res = Db::query($sql,['uid'=>$this->uid,'id'=>182]);
-//        dd($res);
-        $folders = AccountModel::find($this->uid)->getCurrentUserDiskFolder();
-//        dd($folders);
-        $res = self::updateData($folders);
-        dd($res);
-        foreach ($res as $value) {
-            db('net_disk_folder')->where('id', $value['id'])->update([
-                'parent_key' => $value['parent_key']
-            ]);
-        }
-
+    // 申请删除文件夹
+    public function requestDel(){
+        $id = request()->post('id/d', 0);
+        if (!$id) return json2(false, '删除失败');
     }
 
-    static public function updateData($data, $parentKey = '', $level = 1)
+    // 删除文件夹
+    public function del()
     {
-        $result = [];
-        foreach ($data as $key => $value) {
-            $result[] = [
-                'id' => $value['id'],
-                'parent_key' => "{$parentKey}"
-            ];
-            if (empty($value['children'])) continue;
-//            $result[] = array_merge($result,[
-//                'id'=>$value['id'],
-//                'parent_key'=>"{$parentKey}"
-//            ]);
-            if (empty($parentKey)) {
-                $parentKey = "{$value['id']}-";
-            } else {
-                $parentKey .= "{$value['id']}-";
-            }
-            $result = array_merge($result, self::updateData($value['children'], $parentKey, $level + 1));
-        }
-        if ($level = 1) {
-            $result = array_filter($result, function ($value) {
-                return !empty($value['parent_key']);
-            });
-        }
-        return $result;
+        $id = request()->post('id/d', 0);
+        if (!$id) return json2(false, '删除失败');
+
+
+
+        $delKey = request()->post('del_key/s', '');
     }
 }
