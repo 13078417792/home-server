@@ -3,6 +3,7 @@
 namespace app\tool\model;
 
 use think\Model;
+use app\tool\model\Account as AccountModel;
 
 class Base extends Model{
 
@@ -12,4 +13,9 @@ class Base extends Model{
         parent::initialize();
         $this->user_id = $GLOBALS['uid'];
     }
+
+    static public function getAccount(){
+        return AccountModel::find($GLOBALS['uid']);
+    }
+
 }
