@@ -31,7 +31,6 @@ class NetDiskFolder extends Model{
         if($pid!==null){
             $condition['pid'] = $pid;
         }
-//        return $condition;
         return (bool)self::get($condition);
     }
 
@@ -76,11 +75,9 @@ class NetDiskFolder extends Model{
 
     // 引用方式输出树形数据
     static public function handleTreeRef(array $data) {
-//        $tree = [];
         foreach($data as $key => &$value){
             if(!empty($data[$value['pid']])){
                 $data[$value['pid']]['children'][] = &$value;
-//                array_splice($data,$key,1);
             }
         }
         $data = array_filter($data,function($value){
