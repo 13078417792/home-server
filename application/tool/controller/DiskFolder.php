@@ -7,12 +7,14 @@ use think\Request;
 use \app\tool\model\NetDiskFolder as NetDiskFolderModel;
 use \app\tool\model\Account as AccountModel;
 use \think\Db;
+use \think\Cache;
 
 class DiskFolder extends Base
 {
 
     protected $is_update = true;
     protected $account;
+    const DEL_KEY_REDIS = 'delFolderKey_';
 
     public function _initialize()
     {
@@ -209,6 +211,7 @@ class DiskFolder extends Base
             }
         }
 
+        // 影响行数
         $rows = 0;
         foreach ($children_update as $key => $value) {
 //            $update_model = NetDiskFolderModel::get($key);
@@ -231,7 +234,10 @@ class DiskFolder extends Base
         $rows += $update_model->save();
         unset($update_model);
 
-
+        if((bool)$rows){
+            Cache::rm(self::DEL_KEY_REDIS.$id);
+        }
+        // 优化点：每次更新数据后影响行数===0时回退所有操作并返回API_FAIL
         return (bool)$rows ? json2(true, API_SUCCESS) : json2(false, API_FAIL);
     }
 
@@ -244,17 +250,57 @@ class DiskFolder extends Base
     // 申请删除文件夹
     public function requestDel(){
         $id = request()->post('id/d', 0);
-        if (!$id) return json2(false, '删除失败');
+        if (!$id) return json2(false, API_FAIL);
+        $account = $this->account;
+        $detail = $account->folder()->find($id);
+
+        if(empty($detail)) return json2(false,'文件夹不存在');
+        $delKey = cache(self::DEL_KEY_REDIS.$id);
+
+        if($delKey){
+            $lockData = de_lock($delKey);
+            $lockData = json_decode($lockData,true);
+            if(json_last_error()!==JSON_ERROR_NONE) $delKey = '';
+        }
+
+        if(!$delKey){
+            // 是否有子文件夹
+            $children_node = NetDiskFolderModel::hasChildren($detail);
+            $lockData = ['has_child'=>(bool)$children_node,'children_node'=>$children_node,'uuid'=>uniqid(),'time'=>$_SERVER['REQUEST_TIME'],'id'=>$id];
+            $delKey = lock(json_encode($lockData));
+        }
+        cache(self::DEL_KEY_REDIS.$id,$delKey,60);
+
+        $lockData['delKey'] = $delKey;
+        unset($lockData['uuid']);
+        unset($lockData['time']);
+        return json2(true,'',$lockData);
     }
 
     // 删除文件夹
+    // 优化点：同步删除当前文件夹及子文件夹下的文件
     public function del()
     {
         $id = request()->post('id/d', 0);
-        if (!$id) return json2(false, '删除失败');
-
-
-
         $delKey = request()->post('del_key/s', '');
+        if (!$id || !$delKey) return json2(false, API_FAIL);
+        $account = $this->account;
+        $detail = $account->folder()->find($id);
+        if(empty($detail)) return json2(false,'文件夹不存在');
+        $cache = cache(self::DEL_KEY_REDIS.$id);
+        if(!$cache || $cache!==$delKey) return json2(false, API_FAIL,[11,$cache]);
+
+        $lockData = de_lock($delKey);
+        $lockData = json_decode($lockData,true);
+        if(json_last_error()!==JSON_ERROR_NONE || $lockData['id']!==$id) return json2(false, API_FAIL,[22]);
+
+        $rows = $account->folder()->where([
+            'parent_key'=>['like',"{$detail->parent_key}{$id}-%"]
+        ])->whereOr([
+            'id'=>$id
+        ])->delete();
+        Cache::rm(self::DEL_KEY_REDIS.$id);
+
+        return (bool)$rows?json2(true,API_SUCCESS):json2(false,API_FAIL);
     }
 }
