@@ -251,17 +251,52 @@ class DiskFolder extends Base
         $id = request()->post('id/d',null);
         $folders = [];
         $files = [];
-        if($id===null) return json2(true,'',['folders'=>$folders,'files'=>$files]);
+        $folder_exists = false;
+        if($id===null) return json2(true,'',['folders'=>$folders,'files'=>$files,'folder_exists'=>$folder_exists]);
         $account = $this->account;
         $folders = $account->folder()->where([
             'pid'=>$id
         ])->order('update_time desc')->column('id,name,pid,create_time,update_time,index');
         if(!empty($folders)){
             $folders = array_values($folders);
+            $folder_exists = true;
         }
 
 
-        return json2(true,'',['folders'=>$folders,'files'=>$files]);
+        return json2(true,'',['folders'=>$folders,'files'=>$files,'folder_exists'=>$folder_exists]);
+    }
+
+    public function getDetail(){
+        $id = request()->post('id/d',null);
+        if(!$id) return json2(false,'文件夹不存在');
+        $account = $this->account;
+        $detail = $account->folder()->field('index,main_name',true)->find($id);
+//        dd($detail);
+//        return json2(false,'',[$detail]);
+        if(empty($detail)) return json2(false,'文件夹不存在');
+
+        $path = [];
+        if($detail->pid!==0 && $detail->parent_key){
+            $parents = explode('-',$detail->parent_key);
+            $temp = $account->folder()->where([
+                'id'=>['in',$parents]
+            ])->column('id,name')?:[];
+            foreach($parents as $value){
+                if(!empty($temp[$value])){
+                    $path[] = [
+                        'id'=>$value,
+                        'name'=>$temp[$value]
+                    ];
+                }
+            }
+            unset($temp);
+        }
+        $path[] = [
+            'id'=>$id,
+            'name'=>$detail->name
+        ];
+
+        return json2(true,API_SUCCESS,['detail'=>$detail,'path'=>$path]);
     }
 
     // 申请删除文件夹
