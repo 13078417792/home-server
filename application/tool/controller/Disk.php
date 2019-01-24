@@ -52,15 +52,6 @@ class Disk extends Base{
         self::UPLOAD_FAIL_NO_CHUNK=>'没有文件被上传'
     ];
 
-
-
-    /**
-     * 新建文件夹
-     */
-    public function createDir(){
-
-    }
-
     /**
      * 上传前的检查
      * 检查同一文件是否已上传过 || 检查是否续传
