@@ -247,6 +247,23 @@ class DiskFolder extends Base
         return json2(true, '', ['uid' => $this->uid, 'folder' => $folders]);
     }
 
+    public function getContent(){
+        $id = request()->post('id/d',null);
+        $folders = [];
+        $files = [];
+        if($id===null) return json2(true,'',['folders'=>$folders,'files'=>$files]);
+        $account = $this->account;
+        $folders = $account->folder()->where([
+            'pid'=>$id
+        ])->order('update_time desc')->column('id,name,pid,create_time,update_time,index');
+        if(!empty($folders)){
+            $folders = array_values($folders);
+        }
+
+
+        return json2(true,'',['folders'=>$folders,'files'=>$files]);
+    }
+
     // 申请删除文件夹
     public function requestDel(){
         $id = request()->post('id/d', 0);
