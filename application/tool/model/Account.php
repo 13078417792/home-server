@@ -67,4 +67,14 @@ class Account extends Base{
         }
         return $folders;
     }
+
+    public function hasFolder(int $id,bool $detail=false){
+        if(!$id) return false;
+        $info = $this->folder()->find($id);
+        if(!$info) return false;
+        if(!$detail){
+            $info = (bool)$info;
+        }
+        return $info;
+    }
 }
