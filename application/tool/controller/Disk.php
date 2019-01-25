@@ -9,6 +9,7 @@ use \think\Cache;
 use \GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
+use \app\tool\model\Account as AccountModel;
 
 class Disk extends Base{
 
@@ -30,6 +31,7 @@ class Disk extends Base{
 
 
     const UPLOAD_KEY = 'uploadKey_';
+    const UPLOAD_KEY_EXPIRES = 3600*24;
 
     const MD5_FILE_INFO = 'md5_upload_info_';
 
@@ -70,8 +72,17 @@ class Disk extends Base{
         $data = [
             'md5'=>request()->post('md5/s',''),
             'size'=>request()->post('size/d',0),
-            'count'=>request()->post('count/d',0)
+            'count'=>request()->post('count/d',0),
+            'folder_id'=>request()->post('folder_id/d',0),
         ];
+        $folder = $data['folder_id'];
+
+        $hasFolder = true;
+        if($folder!==0){
+            $folder_detail = $this->account->hasFolder($folder,true);
+            $hasFolder = (bool)$folder_detail;
+        }
+        if(!$hasFolder) return json2(false,API_FAIL,['文件夹不存在']);
 
         $md5 = $data['md5'];
         $size = $data['size'];
@@ -98,11 +109,11 @@ class Disk extends Base{
 
         // 秒传 *******************************************
         if($this->isExistFileInDb($md5)){
-            $ok = $this->finish($md5,false);
+            $ok = $this->finish($md5,$folder,false);
             return json2(true,'成功',['fast'=>true,'warn'=>$ok===true?'':$ok]);
         }
         if(count($uploaded)===(int)$count){
-            $ok = $this->finish($md5);
+            $ok = $this->finish($md5,$folder);
             return json2(true,'成功',['fast'=>true,'warn'=>$ok===true?'':$ok]);
         }
         // 秒传 *******************************************
@@ -126,13 +137,13 @@ class Disk extends Base{
 
         // 保存upload_key和文件校验md5的关系
         // 24小时有效期
-        Cache::set(self::UPLOAD_KEY.$upload_key,$md5,3600*24);
+        Cache::set(self::UPLOAD_KEY.$upload_key,json_encode(['md5'=>$md5,'folder_id'=>$folder]),self::UPLOAD_KEY_EXPIRES);
 
         return json2(true,'',['upload_key'=>$upload_key,'uploaded'=>$info['uploaded']]);
     }
 
     // 传输结束
-    protected function finish($md5,bool $check_db=true){
+    protected function finish(string $md5,int $folder_id,bool $check_db=true){
         if($check_db){
             $exist = $this->isExistFileInDb($md5);
             if(!$exist){
@@ -144,6 +155,13 @@ class Disk extends Base{
                 ]);
             }
         }
+        db('user_net_disk')->insert([
+            'file_id'=>$md5,
+            'time'=>$_SERVER['REQUEST_TIME'],
+            'folder_id'=>$folder_id,
+            'account_id'=>$this->uid,
+            'recycle'=>0
+        ]);
         $this->clearMd5Info($md5);
 
         $client = new Client([
@@ -222,9 +240,23 @@ class Disk extends Base{
         return $file_list;
     }
 
-    protected function checkUploadKeyStatus(string $upload_key,string $md5) :bool{
+    protected function parseUploadKey(string $upload_key){
         $data = Cache::get(self::UPLOAD_KEY.$upload_key);
-        return !empty($data) && $data===$md5;
+        $data = json_decode($data,true);
+        if(json_last_error()!==JSON_ERROR_NONE) return false;
+
+        return $data;
+    }
+
+    protected function checkUploadKeyStatus(string $upload_key,string $md5) :bool{
+//        $data = Cache::get(self::UPLOAD_KEY.$upload_key);
+//        $data = json_decode($data,true);
+        $data = $this->parseUploadKey($upload_key);
+        if($data===false && !empty($data['md5'])) return false;
+
+        // 延长
+        Cache::set(self::UPLOAD_KEY.$upload_key,Cache::get(self::UPLOAD_KEY.$upload_key),self::UPLOAD_KEY_EXPIRES);
+        return !empty($data) && $data['md5']===$md5;
     }
 
     protected function clearUploadKey(string $key){
@@ -266,12 +298,18 @@ class Disk extends Base{
 //        $path .= $part;
 
         if($info['count']-1===count($info['uploaded'])){
-            $this->clearUploadKey($key);
-            $ok = $this->finish($md5);
             $extend = [];
-            if($ok!==true){
-                $extend['info'] = '文件合并失败';
+            $uploadKeyInfo = $this->parseUploadKey($key);
+            if($uploadKeyInfo!==false){
+                $ok = $this->finish($md5,$uploadKeyInfo['folder_id']);
+                if($ok!==true){
+                    $extend['info'] = '文件合并失败';
+                }
+            }else{
+                $extend['info'] = '保存文件失败';
             }
+            $this->clearUploadKey($key);
+
             return json2(true,'成功',$extend);
 
 
