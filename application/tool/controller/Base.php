@@ -9,6 +9,7 @@ use \app\back\controller\Base as BackBaseController;
 use \think\Cache;
 use \think\Db;
 use app\tool\controller\Account as AccountController;
+use \app\tool\model\Account as AccountModel;
 
 class Base extends Controller{
 
@@ -24,6 +25,7 @@ class Base extends Controller{
     protected $Auth;
 
     protected $uid = 0;
+    protected $account;
 
     public function _initialize(){
         $GLOBALS['uid'] = 0;
@@ -43,6 +45,7 @@ class Base extends Controller{
 //            BackBaseController::printJson(true,'',['detail'=>$detail]);
             $this->uid = $detail['uid'];
             $GLOBALS['uid'] = $detail['uid'];
+            $this->account = AccountModel::find($this->uid);
 //            printJson(true,'11',['g'=>$detail,'A'=>request()->header('Authorization')]);
         }
 
