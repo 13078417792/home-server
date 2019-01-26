@@ -4,3 +4,4 @@ composer.lock
 thinkphp
 websocket
 websocket-handler
+runtime
