@@ -116,4 +116,12 @@ class Account extends Base{
         ])->count();
         return (bool)$count;
     }
+
+    public function hasUserFile(int $id){
+        return (bool)$this->userDisk()->where($id)->count();
+    }
+
+    public function getUserFileDetail(int $id){
+        return $this->userDisk()->find($id);
+    }
 }
