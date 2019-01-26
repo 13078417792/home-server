@@ -117,3 +117,20 @@ function convertJsonToArray(string $json,bool $inside=true){
     return $result;
 }
 
+
+function deleteDir($dir) {
+    if(!is_dir($dir)) return;
+    $files = scandir($dir);
+    array_shift($files);
+    array_shift($files);
+
+    foreach($files as $file){
+        $current = $dir.DS.$file;
+        if(is_dir($current)){
+            deleteDir($current);
+        }else{
+            unlink($current);
+        }
+    }
+    rmdir($dir);
+}
