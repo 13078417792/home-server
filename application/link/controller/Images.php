@@ -38,11 +38,54 @@ class Images{
         config('app_debug',false);
         $link = request()->get('link/s',null,'strval');
         if(empty($link)){
-            abort(404);
+            response('images not found',404)->send();
+            return;
         }
         $path = config('video.PATH').DS.de_lock($link);
         if(!file_exists($path)){
-            abort(404);
+            response('images not found',404)->send();
+            return;
+        }
+        self::img($path);
+    }
+
+    /*
+     * 生成图片链接
+     * @params $path string 生成链接的图片存放绝对路径
+     * */
+    static public function buildUrl($path){
+
+        $path = str_replace(config('common')['path']['image'],'',$path);
+        if(empty($path)){
+            return false;
+        }
+        $param = lock($path);
+        config('url_common_param',false);
+        return url('/link/images/get',['name'=>$param],'');
+    }
+
+    /*
+     * 判断图片是否存在
+     * @params $path string 图片存放绝对路径
+     * */
+    static public function hasImages($path){
+        $child_path = str_replace(config('common')['path']['image'],'',$path);
+        if(empty($child_path)){
+            return false;
+        }
+        return file_exists($path);
+    }
+
+    public function get(){
+        config('app_trace',false);
+        config('app_debug',false);
+        config('url_common_param',false);
+        $name = request()->param('name');
+        $path = config('common')['path']['image'];
+        $path = $path.DS.de_lock($name);
+        if(!file_exists($path) || empty($name)){
+            response('images not found',404)->send();
+            return;
         }
         self::img($path);
     }

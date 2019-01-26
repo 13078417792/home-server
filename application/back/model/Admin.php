@@ -49,7 +49,7 @@ class Admin extends \think\Model
                 'login_time'=>$_SERVER['REQUEST_TIME']
             ],$detail));
             $auth_token = substr(md5(password_hash($auth_data,PASSWORD_DEFAULT)),8,16);
-            Cache::tag('auth')->set($auth_token,$auth_data,self::$auth_expires);
+            Cache::tag('auth')->set('auth_'.$auth_token,$auth_data,self::$auth_expires);
             return json2(true,'登陆成功',['auth_token'=>$auth_token,'expires'=>self::$auth_expires]);
         }else{
             return json2(false,'登录失败',['error'=>$validate->getError()]);

@@ -48,9 +48,18 @@ class Account extends Base{
         }
     }
 
+    /** 关联模型 Start */
+
     public function folder(){
         return $this->hasMany('NetDiskFolder','account_id');
     }
+
+    public function userDisk(){
+        return $this->hasMany('UserNetDisk','account_id');
+    }
+
+
+    /** 关联模型End */
 
     public function getCurrentUserDiskFolder(bool $tree=true,bool $obj=false){
         $model = $this->folder()->where(['account_id'=>$this->user_id]);
@@ -76,5 +85,35 @@ class Account extends Base{
             $info = (bool)$info;
         }
         return $info;
+    }
+
+    public function getUserDiskFile(int $folder_id){
+        $disk = $this->userDisk();
+        $files = $disk
+            ->where([
+                'a.recycle'=>0,
+                'a.folder_id'=>$folder_id
+            ])
+            ->alias('a')
+            // ->field('a.file_id,a.recycle,a.account_id,b.id,b.time',true)
+                ->field('a.id,a.time,a.folder_id,a.account_id,a.name,b.size,b.is_merge')
+            ->join('net_disk_file b','a.file_id=b.id')
+            ->select();
+        return $files;
+    }
+
+    public function hasUserDiskFile($id) :bool{
+        $disk = $this->userDisk();
+        $exists = $disk->find($id);
+        return (bool)$exists;
+    }
+
+    public function hasSameFileName(string $name,$pid) :bool{
+        $disk = $this->userDisk();
+        $count = $disk->where([
+            'name'=>$name,
+            'folder_id'=>$pid
+        ])->count();
+        return (bool)$count;
     }
 }

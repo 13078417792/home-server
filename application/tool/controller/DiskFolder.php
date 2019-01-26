@@ -19,7 +19,7 @@ class DiskFolder extends Base
     public function _initialize()
     {
         parent::_initialize();
-        $this->account = AccountModel::find($this->uid);
+//        $this->account = AccountModel::find($this->uid);
     }
 
     protected function actionFolder()
@@ -261,6 +261,7 @@ class DiskFolder extends Base
             $folders = array_values($folders);
             $folder_exists = true;
         }
+        $files = $account->getUserDiskFile($id);
 
 
         return json2(true,'',['folders'=>$folders,'files'=>$files,'folder_exists'=>$folder_exists]);

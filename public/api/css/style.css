@@ -146,8 +146,8 @@ select {
   transform: translate(-50% -50%);
 }
 .main #json {
-  width: 80%;
-  height: 1000px;
+  width: 90%;
+  height: 50em;
   overflow: auto;
   border: 1px solid #ccc;
   margin: 5em auto 0 auto;

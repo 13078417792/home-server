@@ -95,7 +95,8 @@ class Rbac
                     $ok = true;
                 }
             }else{
-                $ok = true;
+                $controller = $path_arr[1];
+                $ok = in_array($controller,$temp);
             }
         }else{
             $ok = false;

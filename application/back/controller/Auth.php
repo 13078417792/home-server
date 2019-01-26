@@ -21,7 +21,7 @@ class Auth extends Base{
         if(!$token){
             return $invalid;
         }
-        $cache = Cache::tag('auth')->get($token);
+        $cache = Cache::tag('auth')->get('auth_'.$token);
         return empty($cache)?$invalid:json2(true,'认证通过');
     }
 

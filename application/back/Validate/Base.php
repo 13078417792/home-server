@@ -26,6 +26,9 @@ class Base extends \think\Validate{
 
     public function check($data, $rules = [], $scene = '')
     {
+        if(!$scene){
+            $scene = $this->currentScene;
+        }
         if($scene && !empty($this->messages) && array_key_exists($scene,$this->messages)){
             $this->message = array_merge($this->messages[$scene],$this->message);
         }

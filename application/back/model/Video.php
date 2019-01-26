@@ -77,8 +77,4 @@ class Video extends \think\Model{
             return $info->getError();
         }
     }
-
-    public function list(array $data){
-
-    }
 }
