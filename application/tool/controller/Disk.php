@@ -459,4 +459,45 @@ class Disk extends Base{
         return json2(true,'',['size'=>self::MAX_SIZE]);
     }
 
+    // 删除文件
+    public function deleteFile(){
+        $fid = request()->post('file_id/d',0);
+        if(!$fid) return json2(false,API_FAIL);
+
+        $rows = $this->account->userDisk()->where(['id'=>$fid])->delete();
+        return $rows?json2(true,API_SUCCESS):json2(false,API_FAIL);
+    }
+
+    public function move(){
+        $file = request()->post('file_id/d',0);
+        $folder = request()->post('folder_id/d',0);
+        if(!$file) return json2(false,API_FAIL);
+
+        $account = $this->account;
+        if($folder && !$account->hasFolder($folder)){
+            return json2(false,API_FAIL,['error'=>'目标文件夹不存在或已被删除']);
+        }
+
+       $file_detail =  $account->getUserFileDetail($file);
+        if(!$file_detail){
+            return json2(false,API_FAIL,['error'=>'目标文件不存在或已被删除']);
+        }
+
+        if($file_detail->folder_id===$folder){
+            return json2(true,API_SUCCESS);
+        }
+
+        if($account->hasSameFileName($file_detail->name,$folder)){
+            return json2(false,API_FAIL,['error'=>'已存在同名文件']);
+        }
+
+        $rows = $account->userDisk()->where(['id'=>$file])->update([
+            'folder_id'=>$folder
+        ]);
+
+
+        return $rows?json2(true,API_SUCCESS):json2(false,API_FAIL);
+
+    }
+
 }
