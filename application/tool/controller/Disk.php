@@ -74,15 +74,28 @@ class Disk extends Base{
             'size'=>request()->post('size/d',0),
             'count'=>request()->post('count/d',0),
             'folder_id'=>request()->post('folder_id/d',0),
+            'name'=>request()->post('name/s','')
         ];
         $folder = $data['folder_id'];
+        $name = $data['name'];
+
+        $name = preg_replace("/^[^a-z_\x{4e00}-\x{9fa5}\(\)\d\-]+$/iu",'',trim($name));
+        if(!$name) return json2(false,'非法文件名');
+
+        if(strlen($name)>200) $name = substr($name,0,200);
+        $data['name'] = $name;
+
+        $account = $this->account;
+        $same = $account->hasSameFileName($name,$data['folder_id']);
+//        return json2(false,'',['same'=>$same]);
+        if($same) return json2(false,'已存在相同文件名');
 
         $hasFolder = true;
         if($folder!==0){
             $folder_detail = $this->account->hasFolder($folder,true);
             $hasFolder = (bool)$folder_detail;
         }
-        if(!$hasFolder) return json2(false,API_FAIL,['文件夹不存在']);
+        if(!$hasFolder) return json2(false,'文件夹不存在');
 
         $md5 = $data['md5'];
         $size = $data['size'];
@@ -106,14 +119,22 @@ class Disk extends Base{
 
         // 检查临时保存路径是否存在已上传文件数据块
         $uploaded = $this->findTempFile($md5);
+        array_walk($uploaded,function(&$value){
+            $value = (int)$value;
+        });
+        $uploadKeySaveData = [
+            'md5'=>$md5,
+            'folder_id'=>$folder,
+            'file_name'=>$name
+        ];
 
         // 秒传 *******************************************
         if($this->isExistFileInDb($md5)){
-            $ok = $this->finish($md5,$folder,false);
+            $ok = $this->finish($uploadKeySaveData,false);
             return json2(true,'成功',['fast'=>true,'warn'=>$ok===true?'':$ok]);
         }
         if(count($uploaded)===(int)$count){
-            $ok = $this->finish($md5,$folder);
+            $ok = $this->finish($uploadKeySaveData);
             return json2(true,'成功',['fast'=>true,'warn'=>$ok===true?'':$ok]);
         }
         // 秒传 *******************************************
@@ -122,7 +143,7 @@ class Disk extends Base{
         $upload_key = lock(substr(md5($this->TokenID.$md5.uniqid().time().$this->Auth),8,16));
         $info = $this->getMd5Info($md5);
 
-
+//        return json2(false,'test',['info'=>$info]);
         if($info===false || count($uploaded)!==count($info['uploaded'])){
             // 缓存可能被删除了
 
@@ -137,13 +158,27 @@ class Disk extends Base{
 
         // 保存upload_key和文件校验md5的关系
         // 24小时有效期
-        Cache::set(self::UPLOAD_KEY.$upload_key,json_encode(['md5'=>$md5,'folder_id'=>$folder]),self::UPLOAD_KEY_EXPIRES);
+        Cache::set(self::UPLOAD_KEY.$upload_key,json_encode($uploadKeySaveData),self::UPLOAD_KEY_EXPIRES);
 
         return json2(true,'',['upload_key'=>$upload_key,'uploaded'=>$info['uploaded']]);
     }
 
     // 传输结束
-    protected function finish(string $md5,int $folder_id,bool $check_db=true){
+//    protected function finish(string $md5,int $folder_id,bool $check_db=true){
+    protected function finish_old($key,bool $check_db=true){
+        if(is_array($key) && !empty($key)){
+            $info = $key;
+        }else if(is_string($key) && !empty($key)){
+            $info = $this->parseUploadKey($key);
+        }else{
+            return false;
+        }
+        if($info===false || empty($key)){
+            return false;
+        }
+
+        $md5 = $info['md5'];
+        $folder_id = $info['folder_id'];
         if($check_db){
             $exist = $this->isExistFileInDb($md5);
             if(!$exist){
@@ -160,7 +195,8 @@ class Disk extends Base{
             'time'=>$_SERVER['REQUEST_TIME'],
             'folder_id'=>$folder_id,
             'account_id'=>$this->uid,
-            'recycle'=>0
+            'recycle'=>0,
+            'name'=>$info['file_name']
         ]);
         $this->clearMd5Info($md5);
 
@@ -184,6 +220,66 @@ class Disk extends Base{
             return $e->getMessage();
         }
         return json_decode($response->getBody(),true);
+
+
+    }
+
+    protected function finish($key,bool $check_db=true){
+        if(is_array($key) && !empty($key)){
+            $info = $key;
+        }else if(is_string($key) && !empty($key)){
+            $info = $this->parseUploadKey($key);
+        }else{
+            return false;
+        }
+        if($info===false || empty($key)){
+            return false;
+        }
+
+        $md5 = $info['md5'];
+        $folder_id = $info['folder_id'];
+
+        $merge = self::TEMP_SAVE.DS.$md5.DS.'merge'.DS.'merge';
+        $new_merge = self::SAVE_PATH.DS.$md5;
+        rename($merge,$new_merge);
+        $merge = $new_merge;
+        unset($new_merge);
+
+        if($check_db){
+            $exist = $this->isExistFileInDb($md5);
+            if(!$exist){
+                db('net_disk_file')->insert([
+                    'id'=>$md5,
+                    'size'=>filesize($merge),
+                    'time'=>time(),
+                    'is_merge'=>1
+                ]);
+            }
+        }else{
+            try{
+                db('net_disk_file')->where(['id'=>$md5])->update([
+                    'size'=>filesize($merge),
+                    'time'=>time(),
+                    'is_merge'=>1
+                ]);
+            }catch(Exception $e){
+                return false;
+            }
+        }
+        db('user_net_disk')->insert([
+            'file_id'=>$md5,
+            'time'=>$_SERVER['REQUEST_TIME'],
+            'folder_id'=>$folder_id,
+            'account_id'=>$this->uid,
+            'recycle'=>0,
+            'name'=>$info['file_name']
+        ]);
+        $this->clearMd5Info($md5);
+
+        deleteDir(self::TEMP_SAVE.DS.$md5);
+
+
+        return true;
 
 
     }
@@ -279,7 +375,7 @@ class Disk extends Base{
         $info = $this->getMd5Info($md5);
 
         if($part>=$info['count']) return json2(false,'上传失败',['code'=>self::UPLOAD_FAIL_INFO_NOT_MATCH]);
-
+//        37c9991a3f2919b4186fca5383a55be4
         if(in_array($part,$info['uploaded'])){
             return json2(true,'成功');
         }
@@ -288,6 +384,11 @@ class Disk extends Base{
         $file = request()->file('file');
         if(!$file) return json2(false,'上传失败',['code'=>self::UPLOAD_FAIL_NO_CHUNK]);
         $path = self::TEMP_SAVE.DS.$md5.DS;
+
+        if(!is_dir($path)){
+            mkdir($path,0770);
+        }
+
         $move_info = $file->move($path,'');
         $file_name = $move_info->getFilename();
 
@@ -295,22 +396,37 @@ class Disk extends Base{
         chmod($path,0770);
         chmod($path.$part,0770);
 
+        $merge_dir = $path.'merge'.DS;
+        $merge_file = $merge_dir.'merge';
+        if(!is_dir($merge_dir)){
+            mkdir($merge_dir,0770);
+        }
+//        return json2(false,'',['dir'=>$merge_dir]);
+
 //        $path .= $part;
 
+        if(!is_file($merge_file)){
+            $fp = fopen($merge_file,'x');
+            fclose($fp);
+        }
+
+        $fp = fopen($merge_file,'rb+');
+        fseek($fp,$part*self::CHUNK_SIZE);
+        $tempFp = fopen($path.$part,'rb');
+        fwrite($fp,fread($tempFp,filesize($path.$part)));
+        fclose($tempFp);
+        fclose($fp);
+        chmod($merge_dir,0770);
+        chmod($merge_file,0770);
+//        unlink($path.$part);
+
+
         if($info['count']-1===count($info['uploaded'])){
-            $extend = [];
-            $uploadKeyInfo = $this->parseUploadKey($key);
-            if($uploadKeyInfo!==false){
-                $ok = $this->finish($md5,$uploadKeyInfo['folder_id']);
-                if($ok!==true){
-                    $extend['info'] = '文件合并失败';
-                }
-            }else{
-                $extend['info'] = '保存文件失败';
-            }
+            $ok = $this->finish($key);
+            if(!$ok) return json2(false,API_FAIL);
             $this->clearUploadKey($key);
 
-            return json2(true,'成功',$extend);
+            return json2(true,'成功');
 
 
         }else{
