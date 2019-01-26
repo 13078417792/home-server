@@ -240,10 +240,15 @@ class Disk extends Base{
         $folder_id = $info['folder_id'];
 
         $merge = self::TEMP_SAVE.DS.$md5.DS.'merge'.DS.'merge';
-        $new_merge = self::SAVE_PATH.DS.$md5;
-        rename($merge,$new_merge);
-        $merge = $new_merge;
-        unset($new_merge);
+        if(is_file($merge)){
+            $new_merge = self::SAVE_PATH.DS.$md5;
+            rename($merge,$new_merge);
+            $merge = $new_merge;
+            unset($new_merge);
+        }else{
+            $merge = self::SAVE_PATH.DS.$md5;
+        }
+
 
         if($check_db){
             $exist = $this->isExistFileInDb($md5);
