@@ -9,26 +9,6 @@ use app\tool\model\Account as AccountModel;
 
 class Account extends Base {
 
-    static public function CheckAuth($detail=false){
-        $auth = request()->header('Authorization');
-        if(!$auth) return false;
-        $result = Cache::get(self::AUTH_ID_REDIS.$auth);
-
-        if(!$result) return false;
-        if(!$detail) return true;
-        $result = json_decode($result,true);
-        $uid = $result['uid'];
-        if(!$uid) return false;
-        $model = AccountModel::get($uid);
-        if(!$model) return false;
-        $result = [
-            'uid'=>$model->uid,
-            'username'=>$model->username,
-            'status'=>$model->status
-        ];
-        return $result;
-    }
-
     public function CheckAuthID(){
         return self::CheckAuth()===false?json2(false,'登录已过期'):json2(true,'');
     }

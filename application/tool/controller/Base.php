@@ -34,24 +34,49 @@ class Base extends Controller{
         $token = request()->header('X-TokenID');
 
 
-        if(!$token || !Token::CheckToken($token)){
-            BackBaseController::printJson(false,'操作失败',['info'=>'token无效','code'=>self::TOKEN_VAILD_CODE,'token'=>$token]);
-        }
+//        if(!$token || !Token::CheckToken($token)){
+//            BackBaseController::printJson(false,'操作失败',['info'=>'token无效','code'=>self::TOKEN_VAILD_CODE,'token'=>$token]);
+//        }
         if(self::checkNeedAuth()){
-            $detail = AccountController::CheckAuth(true);
+            $detail = self::CheckAuth(true);
             if($detail===false){
                 BackBaseController::printJson(false,'请先登录');
             }
 //            BackBaseController::printJson(true,'',['detail'=>$detail]);
-            $this->uid = $detail['uid'];
-            $GLOBALS['uid'] = $detail['uid'];
-            $this->account = AccountModel::find($this->uid);
+//            $this->uid = $detail['uid'];
+//            $GLOBALS['uid'] = $detail['uid'];
+//            $this->account = AccountModel::find($this->uid);
+            $this->uid = $detail->uid;
+            $GLOBALS['uid'] = $detail->uid;
+            $this->account = $detail;
 //            printJson(true,'11',['g'=>$detail,'A'=>request()->header('Authorization')]);
         }
 
         $this->TokenID = $token;
         $this->Auth = request()->header('Authorization');
+        $GLOBALS['Auth'] = $this->Auth;
 
+    }
+
+    static public function CheckAuth($detail=false,string $auth=''){
+        if(!$auth) $auth = request()->header('Authorization');
+        if(!$auth) return false;
+        $result = Cache::get(self::AUTH_ID_REDIS.$auth);
+
+        if(!$result) return false;
+        if(!$detail) return true;
+        $result = json_decode($result,true);
+        $uid = $result['uid'];
+        if(!$uid) return false;
+        $model = AccountModel::get($uid);
+        if(!$model) return false;
+        return $model;
+//        $result = [
+//            'uid'=>$model->uid,
+//            'username'=>$model->username,
+//            'status'=>$model->status
+//        ];
+//        return $result;
     }
 
     // 检查当前请求是否需要登录认证
