@@ -99,6 +99,16 @@ class Account extends Base{
                 ->field('a.id,a.time,a.folder_id,a.account_id,a.name,b.size,b.is_merge')
             ->join('net_disk_file b','a.file_id=b.id')
             ->select();
+        config('url_common_param',false);
+        foreach($files as &$file){
+            $file['download'] = url('/tool/disk/download',[
+                'file'=>lock(json_encode([
+                    'file_id'=>$file['id'],
+                    'name'=>$file['name'],
+                    'auth'=>$GLOBALS['Auth']
+                ]))
+            ],'');
+        }
         return $files;
     }
 
