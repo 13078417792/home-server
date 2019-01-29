@@ -112,11 +112,11 @@ class Account extends Base{
         return $files;
     }
 
-    public function hasUserDiskFile($id) :bool{
-        $disk = $this->userDisk();
-        $exists = $disk->find($id);
-        return (bool)$exists;
-    }
+//    public function hasUserDiskFile($id) :bool{
+//        $disk = $this->userDisk();
+//        $exists = $disk->find($id);
+//        return (bool)$exists;
+//    }
 
     public function hasSameFileName(string $name,$pid) :bool{
         $disk = $this->userDisk();
