@@ -249,6 +249,8 @@ class DiskFolder extends Base
 
     public function getContent(){
         $id = request()->post('id/d',null);
+        $exclude = (bool)request()->post('exclude_file/d',0);
+
         $folders = [];
         $files = [];
         $folder_exists = false;
@@ -261,8 +263,9 @@ class DiskFolder extends Base
             $folders = array_values($folders);
             $folder_exists = true;
         }
-        $files = $account->getUserDiskFile($id);
-
+        if(!$exclude){
+            $files = $account->getUserDiskFile($id);
+        }
 
         return json2(true,'',['folders'=>$folders,'files'=>$files,'folder_exists'=>$folder_exists]);
     }
@@ -331,7 +334,7 @@ class DiskFolder extends Base
     }
 
     // 删除文件夹
-    // 优化点：同步删除当前文件夹及子文件夹下的文件
+    // 文件将不会放进回收站，直接从数据库中移除
     public function del()
     {
         $id = request()->post('id/d', 0);
@@ -347,11 +350,23 @@ class DiskFolder extends Base
         $lockData = json_decode($lockData,true);
         if(json_last_error()!==JSON_ERROR_NONE || $lockData['id']!==$id) return json2(false, API_FAIL,[22]);
 
-        $rows = $account->folder()->where([
+
+        $folder_ids = $account->folder()->where([
             'parent_key'=>['like',"{$detail->parent_key}{$id}-%"]
         ])->whereOr([
             'id'=>$id
+        ])->column('id');
+
+
+        $rows = $account->folder()->where([
+            'id'=>['in',$folder_ids]
         ])->delete();
+
+        $rows += $account->userDisk()->where([
+            'folder_id'=>['in',$folder_ids]
+        ])->delete();
+
+
         Cache::rm(self::DEL_KEY_REDIS.$id);
 
         return (bool)$rows?json2(true,API_SUCCESS):json2(false,API_FAIL);
