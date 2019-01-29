@@ -128,10 +128,16 @@ class Account extends Base{
     }
 
     public function hasUserFile(int $id){
-        return (bool)$this->userDisk()->where($id)->count();
+        return (bool)$this->userDisk()->where([
+            'id'=>$id,
+            'recycle'=>0
+        ])->count();
     }
 
     public function getUserFileDetail(int $id){
-        return $this->userDisk()->find($id);
+        return $this->userDisk()->find([
+            'id'=>$id,
+            'recycle'=>0
+        ]);
     }
 }
