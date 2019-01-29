@@ -122,7 +122,8 @@ class Account extends Base{
         $disk = $this->userDisk();
         $count = $disk->where([
             'name'=>$name,
-            'folder_id'=>$pid
+            'folder_id'=>$pid,
+            'recycle'=>0
         ])->count();
         return (bool)$count;
     }
