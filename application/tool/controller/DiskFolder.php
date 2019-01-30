@@ -250,6 +250,7 @@ class DiskFolder extends Base
     public function getContent(){
         $id = request()->post('id/d',null);
         $exclude = (bool)request()->post('exclude_file/d',0);
+        $check_child = (bool)request()->post('check_child/d',0);
 
         $folders = [];
         $files = [];
@@ -258,7 +259,28 @@ class DiskFolder extends Base
         $account = $this->account;
         $folders = $account->folder()->where([
             'pid'=>$id
-        ])->order('update_time desc')->column('id,name,pid,create_time,update_time,index');
+        ])->order('update_time desc')->column('id,name,pid,create_time,update_time,index','id');
+
+        if($check_child){
+            $folder_id_arr = [];
+            foreach($folders as $key => $value){
+                $folder_id_arr[] = $value['id'];
+                $folders[$key]['has_child'] = false;
+            }
+            if(!empty($folder_id_arr)){
+                $child_folder = array_unique($account->folder()->where([
+                    'pid'=>['in',$folder_id_arr]
+                ])->column('pid'));
+
+                foreach($child_folder as $value){
+                    $folders[$value]['has_child'] = true;
+                }
+            }
+
+
+        }
+
+
         if(!empty($folders)){
             $folders = array_values($folders);
             $folder_exists = true;

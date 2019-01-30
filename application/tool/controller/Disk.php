@@ -478,11 +478,32 @@ class Disk extends Base
     // 删除文件
     public function deleteFile()
     {
-        $fid = request()->post('file_id/d', 0);
+        $fid = request()->post('id/d', 0);
         if (!$fid) return json2(false, API_FAIL);
 
-        $rows = $this->account->userDisk()->where(['id' => $fid])->delete();
+        $rows = $this->account->userDisk()->where(['id' => $fid])->update([
+            'recycle'=>1
+        ]);
         return $rows ? json2(true, API_SUCCESS) : json2(false, API_FAIL);
+    }
+
+    // 从回收站删除指定文件
+    public function deleteFileFromRecycle(){
+        $fid = request()->post('id/d', 0);
+        if (!$fid) return json2(false, API_FAIL);
+
+        $rows = $this->account->userDisk()->where([
+            'id'=>$fid
+        ])->delete();
+        return $rows?json2(true,API_SUCCESS):json2(false,API_FAIL.',文件可能已被永久删除');
+    }
+
+    // 清空回收站
+    public function clearRecycle(){
+        $this->account->userDisk()->where([
+            'recycle'=>1
+        ])->delete();
+        return json2(true,API_SUCCESS);
     }
 
     public function move()
@@ -581,5 +602,17 @@ class Disk extends Base
         exit;
 
     }
+
+//    public function move(){
+//        $file = request()->post('file_id/d',0);
+//        $folder = request()->post('folder_id/d',0);
+//        if(!$file) return json2(false,API_FAIL);
+//
+//        $account = $this->account;
+//        // 文件是否存在
+////        $account->hasUserFile()
+//    }
+
+
 
 }

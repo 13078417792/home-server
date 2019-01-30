@@ -128,7 +128,7 @@ class Account extends Base{
         return (bool)$count;
     }
 
-    public function hasUserFile(int $id){
+        public function hasUserFile(int $id){
         return (bool)$this->userDisk()->where([
             'id'=>$id,
             'recycle'=>0
