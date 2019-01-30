@@ -65,6 +65,41 @@ class Account extends Base {
         return json2(true,'注册成功');
     }
 
+    public function modify_password(){
+        $old = trim(request()->post('old_pwd/s',''));
+        $new = trim(request()->post('password/s',''));
+        $rpwd = trim(request()->post('repeat_password/s',''));
+
+        $data = [
+            'old'=>$old,
+            'pwd'=>$new,
+            'rpwd'=>$rpwd
+        ];
+
+        array_walk($data,function(&$value){
+            $value = str_replace(' ','',$value);
+        });
+
+        $validate = validate('Account');
+
+
+//        return dd($validate);
+        $ok = $validate->scene('modify')->check($data);
+        if(!$ok){
+            return json2(false,API_FAIL,['error'=>$validate->getError()]);
+        }
+
+
+        $hash = password_hash($new,PASSWORD_DEFAULT);
+        $rows = $this->account->where([
+            'uid'=>$this->uid
+        ])->update(['pwd'=>$hash]);
+
+        return $rows?json2(true,API_SUCCESS):json2(false,API_FAIL);
+
+    }
+
+
 
 
 }
