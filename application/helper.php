@@ -7,19 +7,30 @@
  */
 use \app\back\controller\Base as BackBaseController;
 use \GuzzleHttp\Client;
+use \think\Env;
 
-// 网盘-文件最终保存文职
-if(!realpath(ROOT_PATH.'..'.DS.'..'.DS.'net-disk-save')){
-    mkdir(ROOT_PATH.'..'.DS.'..'.DS.'net-disk-save',0770);
+$GLOBALS['main_domain'] = Env::get('domain.online');
+$GLOBALS['ip'] = Env::get('ip');
+$GLOBALS['tool_domain'] = "api.tool.{$GLOBALS['main_domain']}";
+$GLOBALS['local_ip'] = Env::get('local_ip');
+
+function isOnline(){
+    return (preg_match("/.*{$GLOBALS['main_domain']}$/",$_SERVER['HTTP_HOST'])!==-1) || $_SERVER['SERVER_ADDR']===$GLOBALS['local_ip'];
 }
-define('DISK_SAVE_PATH',realpath(ROOT_PATH.'..'.DS.'..'.DS.'net-disk-save'));
+
+if(!isOnline()) {
+// 网盘-文件最终保存位置
+    if (!realpath(ROOT_PATH . '..' . DS . '..' . DS . 'net-disk-save')) {
+        mkdir(ROOT_PATH . '..' . DS . '..' . DS . 'net-disk-save', 0770);
+    }
+    define('DISK_SAVE_PATH', realpath(ROOT_PATH . '..' . DS . '..' . DS . 'net-disk-save'));
 
 // 网盘-上传的数据块的临时保存位置
-if(!realpath(DISK_SAVE_PATH.DS.'temp')){
-    mkdir(DISK_SAVE_PATH.DS.'temp',0770);
+    if (!realpath(DISK_SAVE_PATH . DS . 'temp')) {
+        mkdir(DISK_SAVE_PATH . DS . 'temp', 0770);
+    }
+    define('DISK_TEMP_SAVE_PATH', realpath(DISK_SAVE_PATH . DS . 'temp'));
 }
-define('DISK_TEMP_SAVE_PATH',realpath(DISK_SAVE_PATH.DS.'temp'));
-
 //use crypt;
 function dd($var)
 {
