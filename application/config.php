@@ -1,23 +1,44 @@
 <?php
-// +----------------------------------------------------------------------
-// | ThinkPHP [ WE CAN DO IT JUST THINK ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2006~2018 http://thinkphp.cn All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
-// +----------------------------------------------------------------------
-// | Author: liu21st <liu21st@gmail.com>
-// +----------------------------------------------------------------------
-$debug = true;
+/**
+ * Created by PhpStorm.
+ * User: 39720
+ * Date: 2019/1/31
+ * Time: 23:33
+ */
+
+use \think\Env;
+use \think\Config;
+//Config::load('online_config.php','','online');
+//Config::load('local_config.php','','local');
+//
+//Config::range(Env::get('env'));
+//
+//return Config::get('',Env::get('env'));
+$config = [
+    'online'=>[
+        'hostname'=>Env::get('online_database.hostname'),
+        'username'=>Env::get('online_database.username'),
+        'password'=>Env::get('online_database.password'),
+        'domain'=>Env::get('domain.online'),
+    ],
+    'local'=>[
+        'hostname'=>Env::get('local_database.hostname'),
+        'username'=>Env::get('local_database.username'),
+        'password'=>Env::get('local_database.password'),
+        'domain'=>Env::get('domain.local'),
+    ],
+
+];
+
 return [
     // +----------------------------------------------------------------------
     // | 应用设置
     // +----------------------------------------------------------------------
 
     // 应用调试模式
-    'app_debug'              => $debug,
+    'app_debug'              => Env::get('dev'),
     // 应用Trace
-    'app_trace'              => $debug,
+    'app_trace'              => Env::get('dev'),
     // 应用模式状态
     'app_status'             => '',
     // 是否支持多模块
@@ -57,7 +78,7 @@ return [
     // 默认模块名
     'default_module'         => 'back',
     // 禁止访问模块
-    'deny_module_list'       => ['common','websocket'],
+    'deny_module_list'       => ['common'],
     // 默认控制器名
     'default_controller'     => 'index',
     // 默认操作名
@@ -98,7 +119,7 @@ return [
     // 域名部署
     'url_domain_deploy'      => true,
     // 域名根，如thinkphp.cn
-    'url_domain_root'        => 'server.php',
+    'url_domain_root'        => $config[Env::get('env')]['domain'],
     // 是否自动转换URL中的控制器和操作名
     'url_convert'            => true,
     // 默认的访问控制器层
@@ -153,7 +174,7 @@ return [
 
     // 异常页面的模板文件
 //    'exception_tmpl'         => THINK_PATH . 'tpl' . DS . 'think_exception.tpl',
-    'exception_tmpl'         => $debug?THINK_PATH . 'tpl' . DS . 'think_exception.tpl':ROOT_PATH .DS. 'public' . DS . 'error.html',
+    'exception_tmpl'         => THINK_PATH . 'tpl' . DS . 'think_exception.tpl',
 
     // 错误显示信息,非调试模式有效
     'error_message'          => '页面错误！请稍后再试～',
@@ -254,18 +275,65 @@ return [
         'list_rows' => 15,
     ],
 
+    'back_db_config'=>[
+        // 数据库类型
+        'type'            => 'mysql',
+        // 服务器地址
+//    'hostname'        => '127.0.0.1',
+        'hostname'        => $config[Env::get('env')]['hostname'],
+        // 数据库名
+        'database'        => 'home-server',
+        // 用户名
+        'username'        => $config[Env::get('env')]['username'],
+        // 密码
+        'password'        => $config[Env::get('env')]['password'],
+        // 端口
+        'hostport'        => '',
+        // 连接dsn
+        'dsn'             => '',
+        // 数据库连接参数
+        'params'          => [],
+        // 数据库编码默认采用utf8
+        'charset'         => 'utf8',
+        // 数据库表前缀
+        'prefix'          => '',
+        // 数据库调试模式
+        'debug'           => true,
+        // 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)
+        'deploy'          => 0,
+        // 数据库读写是否分离 主从式有效
+        'rw_separate'     => false,
+        // 读写分离后 主服务器数量
+        'master_num'      => 1,
+        // 指定从服务器序号
+        'slave_no'        => '',
+        // 自动读取主库数据
+        'read_master'     => false,
+        // 是否严格检查字段是否存在
+        'fields_strict'   => true,
+        // 数据集返回类型
+        'resultset_type'  => 'array',
+        // 自动写入时间戳字段
+        'auto_timestamp'  => false,
+        // 时间字段取出后的默认时间格式
+        'datetime_format' => 'Y-m-d H:i:s',
+//    'datetime_format'=>false,
+        // 是否需要进行SQL性能分析
+        'sql_explain'     => false,
+    ],
+
     'tool_db_config'=>[
         // 数据库类型
         'type'            => 'mysql',
         // 服务器地址
 //    'hostname'        => '127.0.0.1',
-        'hostname'        => '192.168.1.5',
+        'hostname'        => $config[Env::get('env')]['hostname'],
         // 数据库名
         'database'        => 'tool',
         // 用户名
-        'username'        => 'vm',
+        'username'        => $config[Env::get('env')]['username'],
         // 密码
-        'password'        => 'root',
+        'password'        => $config[Env::get('env')]['password'],
         // 端口
         'hostport'        => '',
         // 连接dsn
