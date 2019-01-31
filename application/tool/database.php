@@ -5,19 +5,32 @@
  * Date: 2019/1/11
  * Time: 15:27
  */
+use \think\Env;
 
-return [
+$dev = [
+    'hostname'        => Env::get('local_database.hostname'),
+    'username'        => Env::get('local_database.username'),
+    'password'        => Env::get('local_database.password'),
+];
+
+$pro = [
+    'hostname'        => Env::get('online_database.hostname'),
+    'username'        => Env::get('online_database.username'),
+    'password'        => Env::get('online_database.password'),
+];
+
+//Env::get(Env::get('env').'_database.host')
+$tool_db = array_merge([
     // 数据库类型
     'type'            => 'mysql',
     // 服务器地址
-//    'hostname'        => '127.0.0.1',
-    'hostname'        => '192.168.1.5',
+//    'hostname'        => '192.168.1.5',
+//    // 用户名
+//    'username'        => 'vm',
+//    // 密码
+//    'password'        => 'root',
     // 数据库名
     'database'        => 'tool',
-    // 用户名
-    'username'        => 'vm',
-    // 密码
-    'password'        => 'root',
     // 端口
     'hostport'        => '',
     // 连接dsn
@@ -51,4 +64,6 @@ return [
 //    'datetime_format'=>false,
     // 是否需要进行SQL性能分析
     'sql_explain'     => false,
-];
+],Env::get('env')==='online'?$pro:$dev);
+
+return $tool_db;
