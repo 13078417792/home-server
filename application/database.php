@@ -8,19 +8,22 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
+use \think\Env;
 
-return [
+
+$db =  [
     // 数据库类型
     'type'            => 'mysql',
     // 服务器地址
 //    'hostname'        => '127.0.0.1',
-    'hostname'        => '192.168.1.5',
+//    'hostname'        => !$GLOBALS['isOnline']?'192.168.1.5':$GLOBALS['ip'],
+    'hostname'=>        Env::get(Env::get('env').'_database.hostname'),
     // 数据库名
     'database'        => 'home-server',
     // 用户名
-    'username'        => 'vm',
+    'username'        => Env::get(Env::get('env').'_database.username'),
     // 密码
-    'password'        => 'root',
+    'password'        => Env::get(Env::get('env').'_database.password'),
     // 端口
     'hostport'        => '',
     // 连接dsn
@@ -55,3 +58,5 @@ return [
     // 是否需要进行SQL性能分析
     'sql_explain'     => false,
 ];
+
+return $db;
