@@ -17,7 +17,8 @@ return [
         ':name' => ['back/hello', ['method' => 'post']],
     ],
     '__domain__'=>[
-        'link'=>'link'
+        'link'=>'link',
+        'api.tool'=>'tool'
     ]
 
 ];
