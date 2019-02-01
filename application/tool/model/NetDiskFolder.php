@@ -87,7 +87,7 @@ class NetDiskFolder extends Base{
     }
 
     // 是否有子节点
-    static public function hasChildren($id){
+    static public function getChildrenFolder($id){
         $account = self::getAccount();
         if($id instanceof self){
             $detail = $id;
@@ -103,6 +103,32 @@ class NetDiskFolder extends Base{
 
         return $children_node;
 
+    }
+
+    static public function getChildrenFile($folder_id,bool $count=false){
+        $account = self::getAccount();
+        if($folder_id instanceof self){
+            $detail = $folder_id;
+        }else if(is_int($folder_id) && $folder_id>0){
+            $detail = $account->folder()->find($folder_id);
+            unset($account);
+        }else{
+            return false;
+        }
+        $model = $detail->alias('a')->join('user_net_disk b','a.id=b.folder_id','LEFT')->where([
+            'a.id'=>$detail->id,
+            'recycle'=>0
+        ]);
+        if($count){
+            return $model->count();
+        }else{
+            $model->column('b.id')?:[];
+        }
+        return $detail->alias('a')->join('user_net_disk b','a.id=b.folder_id','LEFT')->where([
+            'a.id'=>$detail->id,
+            'recycle'=>0
+        ])->column('b.id')?:[];
+//        return (bool)$detail->alias('a')->join('user_net_disk b','a.id=b.file_id')->count();
     }
 
 
