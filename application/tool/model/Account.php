@@ -118,17 +118,20 @@ class Account extends Base{
 //        return (bool)$exists;
 //    }
 
-    public function hasSameFileName(string $name,$pid) :bool{
+    public function hasSameFileName(string $name,$pid,array $where=[]) :bool{
         $disk = $this->userDisk();
-        $count = $disk->where([
+        $where = array_merge($where,[
             'name'=>$name,
             'folder_id'=>$pid,
             'recycle'=>0
-        ])->count();
+        ]);
+        $count = $disk->where($where)->count();
+//        dd($count);
+//        exit;
         return (bool)$count;
     }
 
-        public function hasUserFile(int $id){
+    public function hasUserFile(int $id){
         return (bool)$this->userDisk()->where([
             'id'=>$id,
             'recycle'=>0
