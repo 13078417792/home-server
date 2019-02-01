@@ -70,6 +70,7 @@ class Disk extends Base
      */
     public function prepareUpload()
     {
+        if(isOnline()) return json2(false,API_FAIL,['error'=>'上传通道已关闭']);
         if (!$this->TokenID || !$this->Auth) return json2(false, '认证失败！无法上传');
         $data = [
             'md5' => request()->post('md5/s', ''),
@@ -378,6 +379,7 @@ class Disk extends Base
 
     public function upload()
     {
+        if(isOnline()) return json2(false,API_FAIL,['error'=>'上传通道已关闭']);
         // 数据块索引
         $part = request()->post('part/d', null);
 
@@ -458,11 +460,11 @@ class Disk extends Base
 
 
     }
-
-    public function getSavePath()
-    {
-        return json2(true, '', ['path' => DISK_SAVE_PATH, 'temp' => self::TEMP_SAVE]);
-    }
+//
+//    public function getSavePath()
+//    {
+//        return json2(true, '', ['path' => DISK_SAVE_PATH, 'temp' => self::TEMP_SAVE]);
+//    }
 
     // 单个数据块的大小
     public function getChunkSize()
