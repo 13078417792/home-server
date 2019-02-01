@@ -20,12 +20,18 @@ $config = [
         'username'=>Env::get('online_database.username'),
         'password'=>Env::get('online_database.password'),
         'domain'=>Env::get('domain.online'),
+        'redis'=>[
+            'host'=>Env::get('ip')
+        ]
     ],
     'local'=>[
         'hostname'=>Env::get('local_database.hostname'),
         'username'=>Env::get('local_database.username'),
         'password'=>Env::get('local_database.password'),
         'domain'=>Env::get('domain.local'),
+        'redis'=>[
+            'host'=>'127.0.0.1'
+        ]
     ],
 
 ];
@@ -223,7 +229,8 @@ return [
         // 驱动方式
         //'type'   => 'File',
         'type'   => 'redis',
-        'host'=>'127.0.0.1',
+        'host'=>    $config[Env::get('env')]['redis']['host'],
+        'password'=>'cache39zcj',
         // 缓存保存目录
         'path'   => CACHE_PATH,
         // 缓存前缀
