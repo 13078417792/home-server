@@ -343,8 +343,9 @@ class DiskFolder extends Base
 
         if(!$delKey){
             // 是否有子文件夹
-            $children_node = NetDiskFolderModel::hasChildren($detail);
-            $lockData = ['has_child'=>(bool)$children_node,'children_node'=>$children_node,'uuid'=>uniqid(),'time'=>$_SERVER['REQUEST_TIME'],'id'=>$id];
+            $children_node = NetDiskFolderModel::getChildrenFolder($detail);
+            $children_file = NetDiskFolderModel::getChildrenFile($detail);
+            $lockData = ['has_child'=>(bool)$children_node,'children_node'=>$children_node,'has_child_file'=>(bool)$children_file,'children_file'=>$children_file,'uuid'=>uniqid(),'time'=>$_SERVER['REQUEST_TIME'],'id'=>$id];
             $delKey = lock(json_encode($lockData));
         }
         cache(self::DEL_KEY_REDIS.$id,$delKey,60);
