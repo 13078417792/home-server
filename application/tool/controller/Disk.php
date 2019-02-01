@@ -10,6 +10,7 @@ use \GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
 use \app\tool\model\Account as AccountModel;
+use \app\tool\model\UserNetDisk as UserDiskModel;
 
 class Disk extends Base
 {
@@ -603,6 +604,44 @@ class Disk extends Base
 //        ob_end_clean();
         exit;
 
+    }
+
+    public function rename(){
+        $name = request()->post('name/s','');
+        $id = request()->post('id/d',0);
+
+        if(!$id) return json2(false,API_FAIL,['error'=>'文件不存在']);
+        $name = preg_replace("/^[^a-z_\x{4e00}-\x{9fa5}\(\)\d\-]+$/iu", '', trim($name));
+        if (!$name) return json2(false, '非法文件名');
+
+        $account = $this->account;
+
+        if(!$account->hasUserFile($id)) return json2(false,API_FAIL,['error'=>'文件不存在']);
+
+        $detail = $account->userDisk()->find($id);
+        if($name===$detail->name) return json2(true,API_SUCCESS);
+
+
+//        $count = $account->userDisk()->where([
+//            'name'=>$name,
+//            'folder_id'=>$id,
+//            'recycle'=>0
+//        ])->count();
+//        dd($count);
+//
+//        return;
+        if($account->hasSameFileName($name,$detail->folder_id)) return json2(false,API_FAIL,['error'=>'文件名已存在']);
+
+        try{
+            $update = UserDiskModel::get($id);
+            $update->name = $name;
+            $update->time = $_SERVER['REQUEST_TIME'];
+        }catch(Exception $err){
+            return json2(false,API_FAIL);
+        }
+
+        $rows = $update->save();
+        return $rows?json2(true,API_SUCCESS):json2(false,API_FAIL);
     }
 
 //    public function move(){
