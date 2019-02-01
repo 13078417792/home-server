@@ -15,21 +15,23 @@ $GLOBALS['tool_domain'] = "api.tool.{$GLOBALS['main_domain']}";
 $GLOBALS['local_ip'] = Env::get('local_ip');
 
 function isOnline(){
-    return (preg_match("/.*{$GLOBALS['main_domain']}$/",$_SERVER['HTTP_HOST'])!==-1) || $_SERVER['SERVER_ADDR']===$GLOBALS['local_ip'];
+    $domain = str_replace('.','\.',$GLOBALS['main_domain']);
+    return (preg_match("/{$domain}$/",$_SERVER['HTTP_HOST'])>0) || $_SERVER['SERVER_ADDR']===$GLOBALS['local_ip'];
 }
 
-if(!isOnline()) {
 // 网盘-文件最终保存位置
-    if (!realpath(ROOT_PATH . '..' . DS . '..' . DS . 'net-disk-save')) {
-        mkdir(ROOT_PATH . '..' . DS . '..' . DS . 'net-disk-save', 0770);
-    }
-    define('DISK_SAVE_PATH', realpath(ROOT_PATH . '..' . DS . '..' . DS . 'net-disk-save'));
+define('DISK_SAVE_PATH', '/home/share/net-disk-save');
 
 // 网盘-上传的数据块的临时保存位置
-    if (!realpath(DISK_SAVE_PATH . DS . 'temp')) {
-        mkdir(DISK_SAVE_PATH . DS . 'temp', 0770);
+define('DISK_TEMP_SAVE_PATH', DISK_SAVE_PATH.DS.'temp');
+if(!isOnline()){
+    if (!is_dir(DISK_SAVE_PATH)) {
+        mkdir(DISK_SAVE_PATH, 0770);
     }
-    define('DISK_TEMP_SAVE_PATH', realpath(DISK_SAVE_PATH . DS . 'temp'));
+
+    if (!is_dir(DISK_TEMP_SAVE_PATH)) {
+        mkdir(DISK_TEMP_SAVE_PATH, 0770);
+    }
 }
 //use crypt;
 function dd($var)
