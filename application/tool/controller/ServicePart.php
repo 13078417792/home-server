@@ -15,6 +15,10 @@ class ServicePart extends Base{
         'home'
     ];
 
+    static $port = [
+        'home'=>8998
+    ];
+
     public function update_upload_ip(string $token='',string $part=''){
 //        return 123;
         if(empty($token) || empty($part) || !in_array($part,self::$part)) return json2(false);
@@ -48,7 +52,7 @@ class ServicePart extends Base{
             'part'=>$part
         ])->order('id desc')->value('ip');
         if(empty($ip)) return json2(false);
-        return json2(true,'',['server_ip'=>$ip]);
+        return json2(true,'',['server_ip'=>$ip,'port'=>self::$port[$part]]);
     }
 
 }
