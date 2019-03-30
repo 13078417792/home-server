@@ -100,14 +100,18 @@ class Account extends Base{
             ->join('net_disk_file b','a.file_id=b.id')
             ->select();
         config('url_common_param',false);
+        $ip = db('second_ip')->where([
+            'part'=>'home'
+        ])->order('time desc')->value('ip');
+
         foreach($files as &$file){
-            $file['download'] = url('/tool/disk/download',[
-                'file'=>lock(json_encode([
-                    'file_id'=>$file['id'],
-                    'name'=>$file['name'],
-                    'auth'=>$GLOBALS['Auth']
-                ]))
-            ],'');
+
+            $file_param = lock(json_encode([
+                'file_id'=>$file['id'],
+                'name'=>$file['name'],
+                'auth'=>$GLOBALS['Auth']
+            ]));
+            $file['download'] = "http://{$ip}:8998/tool/disk/download/file/{$file_param}";
         }
         return $files;
     }

@@ -19,6 +19,7 @@ if(strtolower($_SERVER['REQUEST_METHOD'])==='options'){
     http_response_code(200);
     exit;
 }
+
 define('APP_PATH', __DIR__ . '/../application/');
 // 加载框架引导文件
 require __DIR__ . '/../thinkphp/start.php';

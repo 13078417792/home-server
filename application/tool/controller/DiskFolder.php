@@ -126,11 +126,14 @@ class DiskFolder extends Base
             unset($data['id']);
             $result = (bool)$account->folder()->where('id', $id)->update($data);
         } else {
-            $result = (bool)$account->folder()->save($data);
+            $result = $account->folder()->save($data);
         }
 
         if ($result) {
-            return json2(true, "{$tips}成功");
+            if(!$this->is_update) {
+                $id = $result->id;
+            }
+            return json2(true, "{$tips}成功",['folder_id'=>$id]);
         } else {
             return json2(false, "{$tips}失败");
         }
@@ -293,8 +296,8 @@ class DiskFolder extends Base
     }
 
     public function getDetail(){
-        $id = request()->post('id/d',null);
-        if(!$id) return json2(false,'文件夹不存在');
+        $id = request()->post('id/d',0);
+        if($id<0) return json2(false,'文件夹不存在');
         $account = $this->account;
         $detail = $account->folder()->field('index,main_name',true)->find($id);
 //        dd($detail);
